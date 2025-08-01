@@ -25,7 +25,7 @@ tea/
 - Dashboard for analytics and insights
 - Modern responsive UI
 
-*(Add/modify features as per your app)*
+
 
 ## Tech Stack
 
@@ -106,5 +106,3 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-*Feel free to update the description, tech stack, and features to exactly match your application! If you want to add demo screenshots, usage GIFs, author info, or acknowledgments, just let me know and I’ll adjust the README for you.*
