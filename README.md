@@ -31,7 +31,7 @@ tea/
 
 - **Frontend:** React, Vite, JavaScript, HTML, CSS
 - **Backend:** Node.js, Express.js
-- **Database:** MongoDB (assumed)
+- **Database:** MongoDB
 - **Other:** JWT for authentication, RESTful API
 
 ## Getting Started
