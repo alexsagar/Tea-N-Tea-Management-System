@@ -744,3 +744,23 @@
     padding: var(--space-2);
   }
 }
+
+/* Table Footer and Help Text */
+.table-footer {
+  padding: var(--space-4);
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--surface-2));
+}
+
+.help-text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: hsl(var(--fg-muted));
+  text-align: center;
+  line-height: 1.5;
+}
+
+.help-text strong {
+  color: hsl(var(--fg));
+  font-weight: var(--font-weight-semibold);
+}

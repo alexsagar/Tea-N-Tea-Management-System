@@ -46,9 +46,18 @@ router.get('/', authMiddleware, async (req, res) => {
       end.setHours(23, 59, 59, 999);
       query.createdAt = { $gte: start, $lte: end };
     } else if (startDate && endDate) {
+      // Handle timezone issues by creating date ranges that span the full day
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      
+      console.log('Date filtering:', { startDate, endDate, start, end });
+      
       query.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: start,
+        $lte: end
       };
     }
 
@@ -62,6 +71,19 @@ router.get('/', authMiddleware, async (req, res) => {
       .skip((Number(page) - 1) * Number(limit));
 
     const total = await Order.countDocuments(query);
+
+    // Debug logging
+    console.log('Orders Query Debug:', {
+      query,
+      totalOrders: total,
+      returnedOrders: orders.length,
+      sampleOrder: orders[0] ? {
+        id: orders[0]._id,
+        createdAt: orders[0].createdAt,
+        status: orders[0].status,
+        total: orders[0].total
+      } : 'No orders'
+    });
 
     res.json({
       orders,

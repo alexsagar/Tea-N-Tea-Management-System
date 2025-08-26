@@ -46,10 +46,10 @@ const Orders = () => {
     return selected < today;
   };
 
-  // Calculate daily revenue
+  // Calculate daily revenue (only from completed orders)
   const calculateDailyRevenue = () => {
     return orders
-      .filter(order => order.status !== 'cancelled')
+      .filter(order => order.status === 'completed')
       .reduce((total, order) => total + (order.total || 0), 0);
   };
 
@@ -336,6 +336,15 @@ const Orders = () => {
       );
     }
 
+    // Disable status changes for completed orders
+    if (order.status === 'completed') {
+      return (
+        <span className={`order-status ${order.status}`}>
+          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+        </span>
+      );
+    }
+
     return (
       <div className="status-dropdown">
         <select
@@ -501,90 +510,55 @@ const Orders = () => {
       {/* Orders Table */}
       <div className="orders-table">
         <div className="table-header">
-          <h2 className="table-title">
-            Order List - {selectedDate}
-            {isToday() && <span className="today-badge">Today</span>}
-          </h2>
+          <h2 className="table-title">Orders for {selectedDate}</h2>
         </div>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Type</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.map(order => (
-              <tr key={order._id}>
-                <td>
-                  <div className="order-number">#{order.orderNumber}</div>
-                  <div className="order-time">
-                    {new Date(order.createdAt).toLocaleTimeString()}
-                  </div>
-                </td>
-                <td>
-                  <div className="order-customer">
-                    <div className="customer-name">{order.customer?.name || 'Walk-in'}</div>
-                    {order.customer?.phone && (
-                      <div className="customer-phone">{order.customer.phone}</div>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div className="order-items">
-                    <div className="items-count">{order.items.length} items</div>
-                    <div className="items-preview">
-                      {order.items.slice(0, 2).map(item => (
-                        <span key={item._id} className="item-tag">
-                          {item.menuItem?.name || item.name} x{item.quantity}
-                        </span>
-                      ))}
-                      {order.items.length > 2 && (
-                        <span className="item-more">+{order.items.length - 2} more</span>
-                      )}
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div className="order-total">Nrs {(order.total || 0).toFixed(2)}</div>
-                </td>
-                <td>
-                  {renderStatusDropdown(order)}
-                </td>
-                <td>
-                  <span className="order-type">{order.orderType || order.type}</span>
-                </td>
-                <td>
-                  <div className="order-actions">
-                    {!isPastDate() && (
+        
+        {orders.length === 0 ? (
+          <div className="empty-state">
+            <Package size={48} />
+            <h3>No Orders Found</h3>
+            <p>No orders found for {selectedDate}.</p>
+          </div>
+        ) : (
+          <>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>Time</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrders.map((order) => (
+                  <tr key={order._id}>
+                    <td>{order.orderNumber}</td>
+                    <td>{order.customer?.name || 'Walk-in'}</td>
+                    <td>{order.items.length} items</td>
+                    <td>Nrs {order.total?.toFixed(2) || '0.00'}</td>
+                    <td>{renderStatusDropdown(order)}</td>
+                    <td>{order.paymentMethod || 'N/A'}</td>
+                    <td>{new Date(order.createdAt).toLocaleTimeString()}</td>
+                    <td className="actions">
                       <button
-                        className="action-btn edit"
-                        onClick={() => handleEditOrder(order)}
-                        title="Edit order"
+                        className="action-btn print"
+                        onClick={() => handlePrintKOT(order)}
+                        title="Print KOT"
                       >
-                        <Edit size={16} />
+                        🖨️
                       </button>
-                    )}
-                    <button
-                      className="action-btn print"
-                      onClick={() => handlePrintKOT(order)}
-                      title="Print KOT"
-                    >
-                      <Printer size={16} />
-                    </button>
-                    {!isPastDate() && hasPermission('orders', 'delete') && (
-                      order.status === 'cancelled' ? (
+                      {order.status === 'cancelled' ? (
                         <button
                           className="action-btn delete permanent"
                           onClick={() => handlePermanentDelete(order._id)}
                           title="Permanently delete order"
                         >
-                          <Trash2 size={16} />
+                          🗑️
                         </button>
                       ) : (
                         <button
@@ -592,16 +566,24 @@ const Orders = () => {
                           onClick={() => handleCancelOrder(order._id)}
                           title="Cancel order"
                         >
-                          <Trash2 size={16} />
+                          ❌
                         </button>
-                      )
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            
+            {/* Helpful message about completed orders */}
+            <div className="table-footer">
+              <p className="help-text">
+                💡 <strong>Note:</strong> Orders marked as "Completed" cannot have their status changed. 
+                Only completed orders count towards revenue calculations.
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {filteredOrders.length === 0 && (

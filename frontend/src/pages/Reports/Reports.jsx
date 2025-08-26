@@ -40,6 +40,14 @@ const Reports = () => {
       const response = await axios.get(`${API_BASE}/reports/${activeTab}`, {
         params: dateRange
       });
+      
+      console.log(`Reports Debug - ${activeTab}:`, {
+        dateRange,
+        responseData: response.data,
+        totalSales: response.data?.totalSales,
+        salesByCategory: response.data?.salesByCategory
+      });
+      
       setReportData(response.data);
     } catch (error) {
       console.error('Error fetching report data:', error);
@@ -512,6 +520,13 @@ const Reports = () => {
       <div className="reports-header">
         <h1 className="reports-title">Reports & Analytics</h1>
         <p className="reports-subtitle">Comprehensive business insights and performance metrics</p>
+        <button 
+          className="generate-btn"
+          onClick={fetchReportData}
+          style={{ marginTop: '1rem' }}
+        >
+          🔄 Refresh Data
+        </button>
       </div>
 
       <div className="reports-nav">

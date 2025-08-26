@@ -21,12 +21,34 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       const newSocket = io(API_BASE, {
-  transports: ['websocket']
-});
-      setSocket(newSocket);
+        transports: ['websocket', 'polling'], // Fallback to polling if WebSocket fails
+        timeout: 5000,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+      });
 
-      // Join user-specific room by MongoDB _id
-      newSocket.emit('join-room', `user-${user._id}`);
+      // Connection event handlers
+      newSocket.on('connect', () => {
+        console.log('Socket connected successfully');
+        setSocket(newSocket);
+        
+        // Join user-specific room by MongoDB _id
+        newSocket.emit('join-room', `user-${user._id}`);
+      });
+
+      newSocket.on('connect_error', (error) => {
+        console.warn('Socket connection failed:', error.message);
+        // Don't set socket to null, keep trying to reconnect
+      });
+
+      newSocket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
+        if (reason === 'io server disconnect') {
+          // Server disconnected, try to reconnect
+          newSocket.connect();
+        }
+      });
 
       // Handler functions to allow cleanup on unmount
       const handleNewOrder = (order) => {
@@ -61,6 +83,9 @@ export const SocketProvider = ({ children }) => {
         newSocket.off('new-order', handleNewOrder);
         newSocket.off('order-status-update', handleOrderStatusUpdate);
         newSocket.off('low-stock-alert', handleLowStockAlert);
+        newSocket.off('connect');
+        newSocket.off('connect_error');
+        newSocket.off('disconnect');
         newSocket.close();
       };
     }

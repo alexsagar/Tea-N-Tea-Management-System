@@ -20,8 +20,8 @@ router.get('/sales', authMiddleware, async (req, res) => {
       };
     }
 
-    // Add shopId to all $match stages
-    const baseMatch = { ...dateFilter, status: { $ne: 'cancelled' }, shopId: req.user.shopId };
+    // Add shopId to all $match stages - only count completed orders for revenue
+    const baseMatch = { ...dateFilter, status: 'completed', shopId: req.user.shopId };
 
     // Total sales
     const totalSales = await Order.aggregate([
@@ -100,7 +100,7 @@ router.get('/products', authMiddleware, async (req, res) => {
       };
     }
 
-    const baseMatch = { ...dateFilter, status: { $ne: 'cancelled' }, shopId: req.user.shopId };
+    const baseMatch = { ...dateFilter, status: 'completed', shopId: req.user.shopId };
 
     const productPerformance = await Order.aggregate([
       { $match: baseMatch },
@@ -223,7 +223,7 @@ router.get('/financial', authMiddleware, async (req, res) => {
       };
     }
 
-    const baseMatch = { ...dateFilter, status: { $ne: 'cancelled' }, shopId: req.user.shopId };
+    const baseMatch = { ...dateFilter, status: 'completed', shopId: req.user.shopId };
 
     // Revenue and profit
     const financialData = await Order.aggregate([

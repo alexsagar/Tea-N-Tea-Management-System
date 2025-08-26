@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Calendar, TrendingUp, TrendingDown } from 'lucide-react';
+import { useSocket } from '../../context/SocketContext';
 import './Dashboard.css';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { socket } = useSocket();
 
   // Date range state
   const [dateRange, setDateRange] = useState({
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   });
 
@@ -34,6 +36,52 @@ const Dashboard = () => {
     // eslint-disable-next-line
   }, [dateRange]);
 
+  // Add socket event listeners for real-time updates
+  useEffect(() => {
+    if (socket) {
+      // Listen for new orders
+      socket.on('new-order', (newOrder) => {
+        // Check if the new order falls within the current date range
+        const orderDate = new Date(newOrder.createdAt).toISOString().split('T')[0];
+        if (orderDate >= dateRange.startDate && orderDate <= dateRange.endDate) {
+          // Refresh dashboard data to show real-time updates
+          fetchDashboardData();
+        }
+      });
+
+      // Listen for order status updates
+      socket.on('order-status-update', (updatedOrder) => {
+        // Refresh dashboard data if the updated order affects current stats
+        fetchDashboardData();
+      });
+
+      // Listen for order cancellations
+      socket.on('order-cancelled', (cancelledOrder) => {
+        // Refresh dashboard data if the cancelled order affects current stats
+        fetchDashboardData();
+      });
+
+      // Cleanup socket listeners
+      return () => {
+        socket.off('new-order');
+        socket.off('order-status-update');
+        socket.off('order-cancelled');
+      };
+    }
+  }, [socket, dateRange]);
+
+  // Fallback: Refresh data every 30 seconds if socket is not connected
+  useEffect(() => {
+    if (!socket) {
+      const interval = setInterval(() => {
+        console.log('Socket not connected, refreshing dashboard data...');
+        fetchDashboardData();
+      }, 30000); // 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [socket]);
+
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
@@ -55,11 +103,32 @@ const Dashboard = () => {
       const customers = customersRes.data || [];
       const staff = staffRes.data || [];
 
-      // Filter out cancelled orders
+      // Filter out cancelled orders and only count completed orders for revenue
       const activeOrders = orders.filter(order => order.status !== 'cancelled');
+      const completedOrdersForRevenue = orders.filter(order => order.status === 'completed');
 
-      // Calculate revenue and stats for selected period
-      const periodRevenue = activeOrders.reduce((sum, order) => sum + (order.total ?? 0), 0);
+      // Calculate revenue and stats for selected period (only from completed orders)
+      const periodRevenue = completedOrdersForRevenue.reduce((sum, order) => {
+        const orderTotal = order.total || 0;
+        console.log(`Order ${order.orderNumber}: total = ${orderTotal}, status = ${order.status}`);
+        return sum + orderTotal;
+      }, 0);
+
+      console.log('Dashboard Debug Info:', {
+        totalOrders: orders.length,
+        activeOrders: activeOrders.length,
+        periodRevenue,
+        sampleOrder: activeOrders[0] || 'No orders',
+        dateRange
+      });
+
+      // Additional debugging
+      console.log('API Response Debug:', {
+        ordersResponse: ordersRes.data,
+        ordersArray: orders,
+        dateRangeParams: { startDate: dateRange.startDate, endDate: dateRange.endDate },
+        apiUrl: `${API_BASE}/orders`
+      });
       const pendingOrders = activeOrders.filter(order =>
         ['pending', 'confirmed', 'preparing'].includes(order.status)
       ).length;
@@ -87,7 +156,8 @@ const Dashboard = () => {
 
       const previousOrders = previousOrdersRes.data.orders || [];
       const previousActiveOrders = previousOrders.filter(order => order.status !== 'cancelled');
-      const previousPeriodRevenue = previousActiveOrders.reduce((sum, order) => sum + (order.total ?? 0), 0);
+      const previousCompletedOrders = previousOrders.filter(order => order.status === 'completed');
+      const previousPeriodRevenue = previousCompletedOrders.reduce((sum, order) => sum + (order.total ?? 0), 0);
 
       // Calculate revenue change percentage
       const revenueChange = previousPeriodRevenue > 0 
@@ -201,6 +271,17 @@ const Dashboard = () => {
             }}
           >
             Today
+          </button>
+
+          <button 
+            className="reset-date-btn"
+            onClick={() => {
+              const today = new Date().toISOString().split('T')[0];
+              const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+              setDateRange({ startDate: thirtyDaysAgo, endDate: today });
+            }}
+          >
+            Last 30 Days
           </button>
         </div>
       </div>
