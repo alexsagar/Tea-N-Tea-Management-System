@@ -24,7 +24,7 @@ const Settings = () => {
       phone: '',
       email: '',
       logo: null,
-      currency: 'USD',
+      currency: 'NRS',
       timezone: 'UTC'
     },
     tax: {
@@ -44,7 +44,7 @@ const Settings = () => {
       theme: 'light',
       language: 'en',
       dateFormat: 'MM/DD/YYYY',
-      currency: 'USD'
+      currency: 'NRS'
     }
   });
   const [loading, setLoading] = useState(false);
@@ -66,6 +66,7 @@ const Settings = () => {
   ];
 
   const currencies = [
+    { value: 'NRS', label: 'Nepalese Rupee (Nrs)' },
     { value: 'USD', label: 'US Dollar ($)' },
     { value: 'EUR', label: 'Euro (€)' },
     { value: 'GBP', label: 'British Pound (£)' },
@@ -420,23 +421,23 @@ const Settings = () => {
   };
 
   return (
-    <div className="settings-page">
-      <div className="page-header">
-        <h1>Settings</h1>
-        <p>Configure your tea shop management system</p>
+    <div className="settings">
+      <div className="settings-header">
+        <h1 className="settings-title">Settings</h1>
+        <p className="settings-subtitle">Configure your tea shop management system</p>
       </div>
 
-      <div className="settings-tabs">
+      <div className="settings-nav">
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
-              className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+              className={`settings-tab ${activeTab === tab.id ? 'active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <Icon size={16} />
-              {tab.label}
+              <Icon size={20} />
+              <span>{tab.label}</span>
             </button>
           );
         })}
@@ -452,9 +453,9 @@ const Settings = () => {
 
         {renderTabContent()}
 
-        <div className="form-actions">
+        <div className="settings-actions">
           <button
-            className="btn btn-primary"
+            className="settings-btn settings-btn-primary"
             onClick={handleSave}
             disabled={loading}
           >

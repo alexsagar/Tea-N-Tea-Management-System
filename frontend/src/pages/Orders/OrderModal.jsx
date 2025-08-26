@@ -127,28 +127,38 @@ const OrderModal = ({ order, onClose, onSave }) => {
     }
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleModalContentClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content order-modal">
-        <div className="modal-header">
+    <div className="order-modal-overlay" onClick={handleOverlayClick}>
+      <div className="order-modal-content" onClick={handleModalContentClick}>
+        <div className="order-modal-header">
           <h2>{order ? 'Edit Order' : 'New Order'}</h2>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} />
+          <button className="order-close-btn" onClick={onClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
-          {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleSubmit} className="order-modal-form">
+          {error && <div className="order-error-message">{error}</div>}
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="customer" className="form-label">Customer</label>
+          <div className="order-form-row">
+            <div className="order-form-group">
+              <label htmlFor="customer" className="order-form-label">Customer</label>
               <select
                 id="customer"
                 name="customer"
                 value={formData.customer}
                 onChange={handleChange}
-                className="form-select"
+                className="order-form-select"
               >
                 <option value="">Walk-in Customer</option>
                 {customers.map(customer => (
@@ -159,14 +169,14 @@ const OrderModal = ({ order, onClose, onSave }) => {
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="orderType" className="form-label">Order Type *</label>
+            <div className="order-form-group">
+              <label htmlFor="orderType" className="order-form-label">Order Type *</label>
               <select
                 id="orderType"
                 name="orderType"
                 value={formData.orderType}
                 onChange={handleChange}
-                className="form-select"
+                className="order-form-select"
                 required
               >
                 <option value="dine-in">Dine In</option>
@@ -176,14 +186,14 @@ const OrderModal = ({ order, onClose, onSave }) => {
             </div>
 
             {formData.orderType === 'dine-in' && (
-              <div className="form-group">
-                <label htmlFor="table" className="form-label">Table</label>
+              <div className="order-form-group">
+                <label htmlFor="table" className="order-form-label">Table</label>
                 <select
                   id="table"
                   name="table"
                   value={formData.table}
                   onChange={handleChange}
-                  className="form-select"
+                  className="order-form-select"
                 >
                   <option value="">Select Table</option>
                   {tables.map(table => (
@@ -195,14 +205,14 @@ const OrderModal = ({ order, onClose, onSave }) => {
               </div>
             )}
 
-            <div className="form-group">
-              <label htmlFor="paymentMethod" className="form-label">Payment Method *</label>
+            <div className="order-form-group">
+              <label htmlFor="paymentMethod" className="order-form-label">Payment Method *</label>
               <select
                 id="paymentMethod"
                 name="paymentMethod"
                 value={formData.paymentMethod}
                 onChange={handleChange}
-                className="form-select"
+                className="order-form-select"
                 required
               >
                 <option value="cash">Cash</option>
@@ -219,7 +229,7 @@ const OrderModal = ({ order, onClose, onSave }) => {
               <h3>Order Items</h3>
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="order-modal-btn order-modal-btn-secondary"
                 onClick={handleAddItem}
               >
                 <Plus size={16} />
@@ -247,7 +257,7 @@ const OrderModal = ({ order, onClose, onSave }) => {
                           <option value="">Select Item</option>
                           {menuItems.filter(m => m.isAvailable).map(menuItem => (
                             <option key={menuItem._id} value={menuItem._id}>
-                              {menuItem.name} - Nrs{menuItem.price.toFixed(2)}
+                              {menuItem.name} - Nrs{(menuItem.price || 0).toFixed(2)}
                             </option>
                           ))}
                         </select>
@@ -276,7 +286,7 @@ const OrderModal = ({ order, onClose, onSave }) => {
                       <div className="item-total price-label">
                         Nrs{(() => {
                           const menuItem = menuItems.find(m => m._id === item.menuItem);
-                          return menuItem ? (menuItem.price * item.quantity).toFixed(2) : '0.00';
+                          return menuItem ? ((menuItem.price || 0) * (item.quantity || 0)).toFixed(2) : '0.00';
                         })()}
                       </div>
                       <button
@@ -310,7 +320,7 @@ const OrderModal = ({ order, onClose, onSave }) => {
           <div className="order-summary">
   <div className="summary-row total">
     <span>Total:</span>
-    <span>Nrs{calculateTotal().toFixed(2)}</span>
+    <span>Nrs{(calculateTotal() || 0).toFixed(2)}</span>
   </div>
 </div>
 
@@ -318,14 +328,14 @@ const OrderModal = ({ order, onClose, onSave }) => {
           <div className="modal-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="order-modal-btn order-modal-btn-secondary"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="order-modal-btn order-modal-btn-primary"
               disabled={loading}
             >
               {loading ? (

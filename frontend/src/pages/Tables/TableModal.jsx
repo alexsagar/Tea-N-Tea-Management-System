@@ -72,60 +72,70 @@ const TableModal = ({ table, onClose, onSave }) => {
     }
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleModalContentClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content table-modal">
-        <div className="modal-header">
+    <div className="table-modal-overlay" onClick={handleOverlayClick}>
+      <div className="table-modal-content" onClick={handleModalContentClick}>
+        <div className="table-modal-header">
           <h2>{table ? 'Edit Table' : 'Add New Table'}</h2>
-          <button className="close-btn" onClick={onClose} aria-label="Close modal">
-            <X size={24} />
+          <button className="table-close-btn" onClick={onClose} aria-label="Close modal">
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="table-modal-form">
           {error && (
-            <div className="error-message" role="alert">
+            <div className="table-error-message" role="alert">
               {error}
             </div>
           )}
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="number" className="form-label">Table Number *</label>
+          <div className="table-form-row">
+            <div className="table-form-group">
+              <label htmlFor="number" className="table-form-label">Table Number *</label>
               <input
                 type="text"
                 id="number"
                 name="number"
                 value={formData.number}
                 onChange={handleChange}
-                className="form-input"
+                className="table-form-input"
                 required
                 autoComplete="off"
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="capacity" className="form-label">Capacity *</label>
+            <div className="table-form-group">
+              <label htmlFor="capacity" className="table-form-label">Capacity *</label>
               <input
                 type="number"
                 id="capacity"
                 name="capacity"
                 value={formData.capacity}
                 onChange={handleChange}
-                className="form-input"
+                className="table-form-input"
                 min="1"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="location" className="form-label">Location *</label>
+            <div className="table-form-group">
+              <label htmlFor="location" className="table-form-label">Location *</label>
               <select
                 id="location"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                className="form-select"
+                className="table-form-select"
                 required
               >
                 {locations.map(loc => (
@@ -136,14 +146,14 @@ const TableModal = ({ table, onClose, onSave }) => {
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="status" className="form-label">Status *</label>
+            <div className="table-form-group">
+              <label htmlFor="status" className="table-form-label">Status *</label>
               <select
                 id="status"
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="form-select"
+                className="table-form-select"
                 required
               >
                 {statuses.map(status => (
@@ -158,14 +168,14 @@ const TableModal = ({ table, onClose, onSave }) => {
           <div className="modal-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="table-modal-btn table-modal-btn-secondary"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="table-modal-btn table-modal-btn-primary"
               disabled={loading}
             >
               {loading ? (

@@ -197,10 +197,10 @@ const handleSubmit = async (e) => {
             </div>
           </div>
           <div className="modal-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+            <button type="button" className="stockin-modal-btn stockin-modal-btn-secondary" onClick={onClose} disabled={loading}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="stockin-modal-btn stockin-modal-btn-primary" disabled={loading}>
               {loading ? <div className="spinner"></div> : (<><Save size={16} />Add Stock-In</>)}
             </button>
           </div>

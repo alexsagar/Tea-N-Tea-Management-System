@@ -204,4 +204,31 @@ router.delete('/:id', authMiddleware, checkPermission('orders', 'delete'), async
   }
 });
 
+// Permanently delete cancelled order
+router.delete('/:id/permanent', authMiddleware, checkPermission('orders', 'delete'), async (req, res) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, shopId: req.user.shopId });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Only allow permanent deletion of cancelled orders
+    if (order.status !== 'cancelled') {
+      return res.status(400).json({ 
+        message: 'Only cancelled orders can be permanently deleted' 
+      });
+    }
+
+    // Permanently delete the order
+    await Order.findByIdAndDelete(req.params.id);
+
+    if (req.io) req.io.emit('order-deleted', { orderId: req.params.id });
+
+    res.json({ message: 'Order permanently deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 export default router;

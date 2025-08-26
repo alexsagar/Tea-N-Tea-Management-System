@@ -42,7 +42,14 @@ const SignupShop = () => {
   return (
     <div className="signup-container">
       <div className="signup-card">
-        <h2>Create Your Tea Shop</h2>
+        <div className="signup-header">
+          <div className="logo">
+            <span className="logo-icon">🍵</span>
+            <h1>Tea Shop Management</h1>
+          </div>
+          <p className="signup-subtitle">Create your tea shop account</p>
+        </div>
+
         <form onSubmit={handleSubmit} className="signup-form">
           {error && <div className="error-message">{error}</div>}
           {success && (
@@ -58,57 +65,71 @@ const SignupShop = () => {
           )}
 
           <div className="form-group">
-            <label>Shop Name</label>
+            <label htmlFor="shopName" className="form-label">Shop Name</label>
             <input
               type="text"
+              id="shopName"
               name="shopName"
               value={formData.shopName}
               onChange={handleChange}
+              className="form-input"
+              placeholder="Enter your shop name"
               required
               autoFocus
             />
           </div>
 
           <div className="form-group">
-            <label>Shop Address</label>
+            <label htmlFor="address" className="form-label">Shop Address</label>
             <input
               type="text"
+              id="address"
               name="address"
               value={formData.address}
               onChange={handleChange}
-              placeholder="Optional"
+              className="form-input"
+              placeholder="Enter shop address (optional)"
             />
           </div>
 
           <div className="form-group">
-            <label>Owner Name</label>
+            <label htmlFor="ownerName" className="form-label">Owner Name</label>
             <input
               type="text"
+              id="ownerName"
               name="ownerName"
               value={formData.ownerName}
               onChange={handleChange}
+              className="form-input"
+              placeholder="Enter owner's full name"
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Owner Email</label>
+            <label htmlFor="ownerEmail" className="form-label">Owner Email</label>
             <input
               type="email"
+              id="ownerEmail"
               name="ownerEmail"
               value={formData.ownerEmail}
               onChange={handleChange}
+              className="form-input"
+              placeholder="Enter owner's email address"
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Owner Password</label>
+            <label htmlFor="ownerPassword" className="form-label">Owner Password</label>
             <input
               type="password"
+              id="ownerPassword"
               name="ownerPassword"
               value={formData.ownerPassword}
               onChange={handleChange}
+              className="form-input"
+              placeholder="Create a secure password"
               required
             />
           </div>

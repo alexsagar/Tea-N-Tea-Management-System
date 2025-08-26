@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { Bell, LogOut, User, Menu as MenuIcon } from 'lucide-react';
 import axios from 'axios';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import './Header.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -88,6 +89,9 @@ const Header = ({ onToggleSidebar }) => {
             </div>
           )}
         </div>
+        
+        <ThemeToggle />
+        
         <div className="user-wrapper">
           <button 
             className="user-btn"

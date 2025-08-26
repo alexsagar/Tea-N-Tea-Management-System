@@ -102,6 +102,31 @@ router.delete('/:id', authMiddleware, checkPermission('staff', 'delete'), async 
   }
 });
 
+// Permanently delete staff member
+router.delete('/:id/permanent', authMiddleware, checkPermission('staff', 'delete'), async (req, res) => {
+  try {
+    const staff = await User.findOne({ _id: req.params.id, shopId: req.user.shopId });
+    
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff member not found' });
+    }
+
+    // Only allow permanent deletion of inactive staff members
+    if (staff.isActive) {
+      return res.status(400).json({ 
+        message: 'Only inactive staff members can be permanently deleted' 
+      });
+    }
+
+    // Permanently delete the staff member
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'Staff member permanently deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // Update staff permissions
 router.patch('/:id/permissions', authMiddleware, checkPermission('staff', 'update'), async (req, res) => {
   try {

@@ -110,45 +110,60 @@ const InventoryModal = ({ item, onClose, onSave }) => {
     }
   };
 
+  const handleOverlayClick = (e) => {
+    console.log('Overlay clicked:', e.target, e.currentTarget);
+    // Only close if clicking directly on the overlay
+    if (e.target === e.currentTarget) {
+      console.log('Closing modal via overlay click');
+      onClose();
+    }
+  };
+
+  const handleModalContentClick = (e) => {
+    console.log('Modal content clicked, stopping propagation');
+    // Prevent clicks on modal content from bubbling to overlay
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content inventory-modal">
-        <div className="modal-header">
+    <div className="inventory-modal-overlay" onClick={handleOverlayClick}>
+      <div className="inventory-modal-content" onClick={handleModalContentClick}>
+        <div className="inventory-modal-header">
           <h2>{item ? 'Edit Inventory Item' : 'Add New Inventory Item'}</h2>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} />
+          <button className="inventory-close-btn" onClick={onClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="inventory-modal-form">
           {error && (
-            <div className="error-message">
+            <div className="inventory-error-message">
               {error}
             </div>
           )}
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">Item Name *</label>
+          <div className="inventory-form-row">
+            <div className="inventory-form-group">
+              <label htmlFor="name" className="inventory-form-label">Item Name *</label>
               <input
                 type="text"
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="category" className="form-label">Category *</label>
+            <div className="inventory-form-group">
+              <label htmlFor="category" className="inventory-form-label">Category *</label>
               <select
                 id="category"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="form-select"
+                className="inventory-form-select"
                 required
               >
                 {categories.map(cat => (
@@ -159,29 +174,29 @@ const InventoryModal = ({ item, onClose, onSave }) => {
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="currentStock" className="form-label">Current Stock *</label>
+            <div className="inventory-form-group">
+              <label htmlFor="currentStock" className="inventory-form-label">Current Stock *</label>
               <input
                 type="number"
                 id="currentStock"
                 name="currentStock"
                 value={formData.currentStock}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
                 step="0.01"
                 min="0"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="unit" className="form-label">Unit *</label>
+            <div className="inventory-form-group">
+              <label htmlFor="unit" className="inventory-form-label">Unit *</label>
               <select
                 id="unit"
                 name="unit"
                 value={formData.unit}
                 onChange={handleChange}
-                className="form-select"
+                className="inventory-form-select"
                 required
               >
                 {units.map(unit => (
@@ -192,59 +207,57 @@ const InventoryModal = ({ item, onClose, onSave }) => {
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="minStock" className="form-label">Minimum Stock </label>
+            <div className="inventory-form-group">
+              <label htmlFor="minStock" className="inventory-form-label">Minimum Stock</label>
               <input
                 type="number"
                 id="minStock"
                 name="minStock"
                 value={formData.minStock}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
                 step="0.01"
                 min="0"
-                
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="maxStock" className="form-label">Maximum Stock </label>
+            <div className="inventory-form-group">
+              <label htmlFor="maxStock" className="inventory-form-label">Maximum Stock</label>
               <input
                 type="number"
                 id="maxStock"
                 name="maxStock"
                 value={formData.maxStock}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
                 step="0.01"
                 min="0"
-                
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="costPerUnit" className="form-label">Cost per Unit ($) *</label>
+            <div className="inventory-form-group">
+              <label htmlFor="costPerUnit" className="inventory-form-label">Cost per Unit (Nrs) *</label>
               <input
                 type="number"
                 id="costPerUnit"
                 name="costPerUnit"
                 value={formData.costPerUnit}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
                 step="0.01"
                 min="0"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="supplier" className="form-label">Supplier *</label>
+            <div className="inventory-form-group">
+              <label htmlFor="supplier" className="inventory-form-label">Supplier *</label>
               <select
                 id="supplier"
                 name="supplier"
                 value={formData.supplier}
                 onChange={handleChange}
-                className="form-select"
+                className="inventory-form-select"
                 required
               >
                 <option value="">Select Supplier</option>
@@ -256,55 +269,55 @@ const InventoryModal = ({ item, onClose, onSave }) => {
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="expiryDate" className="form-label">Expiry Date</label>
+            <div className="inventory-form-group">
+              <label htmlFor="expiryDate" className="inventory-form-label">Expiry Date</label>
               <input
                 type="date"
                 id="expiryDate"
                 name="expiryDate"
                 value={formData.expiryDate}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="batchNumber" className="form-label">Batch Number</label>
+            <div className="inventory-form-group">
+              <label htmlFor="batchNumber" className="inventory-form-label">Batch Number</label>
               <input
                 type="text"
                 id="batchNumber"
                 name="batchNumber"
                 value={formData.batchNumber}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="location" className="form-label">Storage Location</label>
+            <div className="inventory-form-group">
+              <label htmlFor="location" className="inventory-form-label">Storage Location</label>
               <input
                 type="text"
                 id="location"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                className="form-input"
+                className="inventory-form-input"
                 placeholder="e.g., Shelf A1, Cold Storage"
               />
             </div>
           </div>
 
-          <div className="modal-actions">
+          <div className="inventory-modal-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="inventory-modal-btn inventory-modal-btn-secondary"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="inventory-modal-btn inventory-modal-btn-primary"
               disabled={loading}
             >
               {loading ? (

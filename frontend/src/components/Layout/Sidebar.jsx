@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar = ({ isOpen }) => {
-  const { user, shop } = useAuth(); // Make sure you provide shop in AuthContext
+const Sidebar = () => {
+  const { user, shop } = useAuth();
   const location = useLocation();
 
   const menuItems = [
@@ -40,22 +40,23 @@ const Sidebar = ({ isOpen }) => {
     ) || user?.role === 'admin';
   });
 
-  // Show shop info if available (prefer shop.name/shopId, else fallback to user.shopId)
+  // Show shop info if available
   const shopName = shop?.name || 'Tea Shop';
   const shopId = shop?.shopId || user?.shopId;
 
   return (
-    <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+    <div className="sidebar">
       <div className="sidebar-header">
-        <div className="logo" title={!isOpen && shopName ? `${shopName} (ID: ${shopId})` : undefined}>
+        <div className="logo" title={`${shopName} (ID: ${shopId})`}>
           <span className="logo-icon">🍵</span>
-          {isOpen && (
-            <span className="logo-text">
-              {shopName}
-              <span className="shop-id-badge">{shopId ? ` (${shopId})` : ''}</span>
-            </span>
-          )}
+          <span className="logo-text">
+            {shopName}
+            <span className="shop-id-badge">{shopId ? ` (${shopId})` : ''}</span>
+          </span>
         </div>
+        <button className="toggle-btn" title="Toggle Sidebar">
+          <span>☰</span>
+        </button>
       </div>
 
       <nav className="sidebar-nav">
@@ -68,32 +69,30 @@ const Sidebar = ({ isOpen }) => {
               key={item.path}
               to={item.path}
               className={`nav-item ${isActive ? 'active' : ''}`}
-              title={!isOpen ? item.label : ''}
+              title={item.label}
             >
               <Icon size={20} className="nav-icon" />
-              {isOpen && <span className="nav-label">{item.label}</span>}
+              <span className="nav-label">{item.label}</span>
             </NavLink>
           );
         })}
       </nav>
 
-      {isOpen && (
-        <div className="sidebar-footer">
-          <div className="shop-meta">
-            <div className="shop-meta-label">Shop ID:</div>
-            <div className="shop-meta-value">{shopId || 'N/A'}</div>
+      <div className="sidebar-footer">
+        <div className="shop-meta">
+          <div className="shop-meta-label">Shop ID:</div>
+          <div className="shop-meta-value">{shopId || 'N/A'}</div>
+        </div>
+        <div className="user-info">
+          <div className="user-avatar">
+            {user?.name?.charAt(0).toUpperCase()}
           </div>
-          <div className="user-info">
-            <div className="user-avatar">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div className="user-details">
-              <div className="user-name">{user?.name}</div>
-              <div className="user-role">{user?.role}</div>
-            </div>
+          <div className="user-details">
+            <div className="user-name">{user?.name}</div>
+            <div className="user-role">{user?.role}</div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

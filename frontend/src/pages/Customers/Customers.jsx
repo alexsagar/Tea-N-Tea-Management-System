@@ -18,6 +18,7 @@ const Customers = () => {
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [showModal, setShowModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -31,7 +32,7 @@ const Customers = () => {
 
   useEffect(() => {
     filterCustomers();
-  }, [customers, searchTerm, sortBy]);
+  }, [customers, searchTerm, statusFilter, sortBy]);
 
 const fetchCustomers = async () => {
   try {
@@ -52,6 +53,12 @@ const fetchCustomers = async () => {
         customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         customer.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(customer => 
+        statusFilter === 'active' ? customer.isActive : !customer.isActive
       );
     }
 
@@ -134,72 +141,115 @@ const fetchCustomers = async () => {
   }
 
   return (
-    <div className="customers-page">
-      <div className="page-header">
-        <div className="header-content">
-          <h1>Customer Management</h1>
-          <p>Manage customer information, loyalty points, and purchase history</p>
+    <div className="customers">
+      <div className="customers-header">
+        <div>
+          <h1 className="customers-title">Customers</h1>
         </div>
-        {hasPermission('customers', 'create') && (
-          <button className="btn btn-primary" onClick={handleAddCustomer}>
-            <Plus size={20} />
-            Add Customer
-          </button>
-        )}
+        <button className="add-customer-btn" onClick={() => setShowModal(true)}>
+          <Plus size={16} />
+          Add Customer
+        </button>
       </div>
 
       <div className="customers-filters">
-        <div className="search-bar">
-          <div className="search-input-wrapper">
-            <input
-              type="text"
-              placeholder="Search customers..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-        </div>
-
-        <div className="filter-controls">
-          <div className="filter-group">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="filter-select"
-            >
-              <option value="name">Sort by Name</option>
-              <option value="totalSpent">Sort by Total Spent</option>
-              <option value="loyaltyPoints">Sort by Loyalty Points</option>
-              <option value="visitCount">Sort by Visit Count</option>
-              <option value="lastVisit">Sort by Last Visit</option>
-            </select>
-          </div>
-        </div>
+        <input
+          type="text"
+          placeholder="Search customers..."
+          className="search-input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className="filter-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
       </div>
 
-      <div className="customers-stats">
-        <div className="stat-item">
-          <span className="stat-value">{stats.totalCustomers}</span>
-          <span className="stat-label">Total Customers</span>
+      <div className="customers-table">
+        <div className="table-header">
+          <h2 className="table-title">Customer List</h2>
         </div>
-        <div className="stat-item">
-          <span className="stat-value">{stats.activeCustomers}</span>
-          <span className="stat-label">Active</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">${stats.totalSpent.toFixed(2)}</span>
-          <span className="stat-label">Total Spent</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{stats.totalLoyaltyPoints}</span>
-          <span className="stat-label">Loyalty Points</span>
-        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Loyalty</th>
+              <th>Spending</th>
+              <th>Last Visit</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredCustomers.map(customer => (
+              <tr key={customer._id}>
+                <td>
+                  <div className="customer-name">{customer.name}</div>
+                  {customer.email && (
+                    <div className="customer-email">{customer.email}</div>
+                  )}
+                </td>
+                <td>
+                  <div className="customer-phone">{customer.phone}</div>
+                  {customer.address?.street && (
+                    <div className="text-muted">
+                      {customer.address.street}, {customer.address.city}
+                    </div>
+                  )}
+                </td>
+                <td>
+                  <div className="text-muted">{customer.loyaltyPoints} points</div>
+                  <div className="text-subtle">{getLoyaltyTier(customer.loyaltyPoints)}</div>
+                </td>
+                <td>
+                  <div className="text-muted">Nrs {(customer.totalSpent || 0).toFixed(2)}</div>
+                  <div className="text-subtle">{customer.visitCount} visits</div>
+                </td>
+                <td>
+                  <div className="text-muted">
+                    {customer.lastVisit ? new Date(customer.lastVisit).toLocaleDateString() : '-'}
+                  </div>
+                </td>
+                <td>
+                  <span className={`customer-status ${customer.isActive ? 'active' : 'inactive'}`}>
+                    {customer.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td>
+                  <div className="customer-actions">
+                    <button
+                      className="action-btn edit"
+                      onClick={() => handleEditCustomer(customer)}
+                      title="Edit customer"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    {hasPermission('customers', 'delete') && (
+                      <button
+                        className="action-btn delete"
+                        onClick={() => handleDeleteCustomer(customer._id)}
+                        title="Deactivate customer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {filteredCustomers.length === 0 ? (
+      {filteredCustomers.length === 0 && (
         <div className="empty-state">
-          <Users size={64} />
           <h3>No customers found</h3>
           <p>
             {searchTerm
@@ -207,108 +257,6 @@ const fetchCustomers = async () => {
               : 'Start by adding your first customer'
             }
           </p>
-          {hasPermission('customers', 'create') && !searchTerm && (
-            <button className="btn btn-primary" onClick={handleAddCustomer}>
-              <Plus size={20} className="first-customer" />
-              Add First Customer
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="customers-table-container">
-          <table className="customers-table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Contact</th>
-                <th>Loyalty Points</th>
-                <th>Total Spent</th>
-                <th>Last Visit</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCustomers.map(customer => (
-                <tr key={customer._id}>
-                  <td>
-                    <div className="customer-info">
-                      <div className="customer-avatar">
-                        {customer.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="customer-details">
-                        <div className="customer-name">{customer.name}</div>
-                        {customer.email && (
-                          <div className="customer-email">{customer.email}</div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="contact-info">
-                      <div className="phone-number">{customer.phone}</div>
-                      {customer.address?.street && (
-                        <div className="address">
-                          {customer.address.street}, {customer.address.city}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="loyalty-info">
-                      <div className="loyalty-points">{customer.loyaltyPoints}</div>
-                      <div className="loyalty-tier">{getLoyaltyTier(customer.loyaltyPoints)}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="spending-info">
-                      <div className="total-spent">${customer.totalSpent.toFixed(2)}</div>
-                      <div className="visit-count">{customer.visitCount} visits</div>
-                    </div>
-                  </td>
-                 <td>
-  <div className="last-visit">
-    {customer.lastVisit ? new Date(customer.lastVisit).toLocaleDateString() : '-'}
-  </div>
-</td>
-                  <td>
-                    <span className={`status-badge ${customer.isActive ? 'active' : 'inactive'}`}>
-                      {customer.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="customer-actions">
-                      <button
-                        className="action-btn view-btn"
-                        onClick={() => handleEditCustomer(customer)}
-                        title="View details"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      {hasPermission('customers', 'update') && (
-                        <button
-                          className="action-btn edit-btn"
-                          onClick={() => handleEditCustomer(customer)}
-                          title="Edit customer"
-                        >
-                          <Edit size={16} />
-                        </button>
-                      )}
-                      {hasPermission('customers', 'delete') && (
-                        <button
-                          className="action-btn delete-btn"
-                          onClick={() => handleDeleteCustomer(customer._id)}
-                          title="Deactivate customer"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       )}
 

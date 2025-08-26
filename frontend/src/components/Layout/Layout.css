@@ -1,38 +1,49 @@
+/* Layout.css - Frame.io Style System */
+
 .layout {
   display: flex;
-  height: 100vh;
-  background-color: #f5f7fa;
+  min-height: 100vh;
+  background: hsl(var(--bg));
+  margin: 0;
+  padding: 0;
 }
 
 .main-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  transition: margin-left 0.3s ease;
-  margin-left: 250px;
-}
-
-.main-content.sidebar-closed {
-  margin-left: 70px;
+  flex: 1;
+  margin-left: 250px; /* Exact sidebar width - no gap */
+  position: relative;
+  overflow: hidden;
+  background: hsl(var(--bg));
 }
 
 .content {
   flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  background-color: #f5f7fa;
+  padding: var(--space-6);
+  background: hsl(var(--bg));
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 250px;
+  }
 }
 
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-  }
-  
-  .main-content.sidebar-closed {
-    margin-left: 0;
+    transition: margin-left var(--transition);
   }
   
   .content {
-    padding: 15px;
+    padding: var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: var(--space-3);
   }
 }

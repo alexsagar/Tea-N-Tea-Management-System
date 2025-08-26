@@ -207,22 +207,32 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
     return found ? found.unit : '';
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleModalContentClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content menu-modal">
-        <div className="modal-header">
+    <div className="menu-item-modal-overlay" onClick={handleOverlayClick}>
+      <div className="menu-item-modal-content" onClick={handleModalContentClick}>
+        <div className="menu-item-modal-header">
           <h2>{item ? 'Edit Menu Item' : 'Add New Menu Item'}</h2>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} />
+          <button className="menu-item-close-btn" onClick={onClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
-          {error && <div className="error-message">{error}</div>}
-          <div className="form-grid">
+        <form onSubmit={handleSubmit} className="menu-item-modal-form">
+          {error && <div className="menu-item-error-message">{error}</div>}
+          <div className="menu-item-form-row">
             {/* Name, Category, Price, Cost, Prep Time, Availability */}
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">
+            <div className="menu-item-form-group">
+              <label htmlFor="name" className="menu-item-form-label">
                 Item Name *
               </label>
               <input
@@ -231,12 +241,12 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="form-input"
+                className="menu-item-form-input"
                 required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="category" className="form-label">
+            <div className="menu-item-form-group">
+              <label htmlFor="category" className="menu-item-form-label">
                 Category *
               </label>
               <select
@@ -244,7 +254,7 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="form-select"
+                className="menu-item-form-select"
                 required
               >
                 {CATEGORY_OPTIONS.map((cat) => (
@@ -254,8 +264,8 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
                 ))}
               </select>
             </div>
-            <div className="form-group">
-              <label htmlFor="price" className="form-label">
+            <div className="menu-item-form-group">
+              <label htmlFor="price" className="menu-item-form-label">
                 Price (Nrs) *
               </label>
               <input
@@ -264,14 +274,14 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                className="form-input"
+                className="menu-item-form-input"
                 step="0.01"
                 min="0"
                 required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="cost" className="form-label">
+            <div className="menu-item-form-group">
+              <label htmlFor="cost" className="menu-item-form-label">
                 Cost (Nrs) *
               </label>
               <input
@@ -280,14 +290,14 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
                 name="cost"
                 value={formData.cost}
                 onChange={handleChange}
-                className="form-input"
+                className="menu-item-form-input"
                 step="0.01"
                 min="0"
                 required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="preparationTime" className="form-label">
+            <div className="menu-item-form-group">
+              <label htmlFor="preparationTime" className="menu-item-form-label">
                 Preparation Time (minutes)
               </label>
               <input
@@ -296,12 +306,12 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
                 name="preparationTime"
                 value={formData.preparationTime}
                 onChange={handleChange}
-                className="form-input"
+                className="menu-item-form-input"
                 min="1"
               />
             </div>
-            <div className="form-group">
-              <label className="checkbox-label">
+            <div className="menu-item-form-group">
+              <label className="menu-item-checkbox-label">
                 <input
                   type="checkbox"
                   name="isAvailable"
@@ -506,10 +516,10 @@ const MenuItemModal = ({ item, onClose, onSave }) => {
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button type="button" className="menu-item-modal-btn menu-item-modal-btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="menu-item-modal-btn menu-item-modal-btn-primary" disabled={loading}>
               {loading ? (
                 <div className="spinner"></div>
               ) : (

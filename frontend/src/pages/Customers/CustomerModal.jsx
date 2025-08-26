@@ -145,64 +145,74 @@ const handleLoyaltyPointsUpdate = async (operation) => {
     return 'Basic';
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleModalContentClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content customer-modal">
-        <div className="modal-header">
+    <div className="customer-modal-overlay" onClick={handleOverlayClick}>
+      <div className="customer-modal-content" onClick={handleModalContentClick}>
+        <div className="customer-modal-header">
           <h2>{customer ? 'Edit Customer' : 'Add New Customer'}</h2>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} />
+          <button className="customer-close-btn" onClick={onClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="customer-modal-form">
           {error && (
-            <div className="error-message">
+            <div className="customer-error-message">
               {error}
             </div>
           )}
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">Full Name *</label>
+          <div className="customer-form-row">
+            <div className="customer-form-group">
+              <label htmlFor="name" className="customer-form-label">Full Name *</label>
               <input
                 type="text"
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="form-input"
+                className="customer-form-input"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="phone" className="form-label">Phone Number *</label>
+            <div className="customer-form-group">
+              <label htmlFor="phone" className="customer-form-label">Phone Number *</label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="form-input"
+                className="customer-form-input"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">Email Address</label>
+            <div className="customer-form-group">
+              <label htmlFor="email" className="customer-form-label">Email Address</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="form-input"
+                className="customer-form-input"
               />
             </div>
 
-            <div className="form-group">
-              <label className="checkbox-label">
+            <div className="customer-form-group">
+              <label className="customer-checkbox-label">
                 <input
                   type="checkbox"
                   name="isActive"
@@ -214,67 +224,67 @@ const handleLoyaltyPointsUpdate = async (operation) => {
             </div>
           </div>
 
-          <div className="address-section">
-            <h3>Address Information</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="street" className="form-label">Street Address</label>
+          <div className="customer-address-section">
+            <h3 className="customer-section-title">Address Information</h3>
+            <div className="customer-form-row">
+              <div className="customer-form-group">
+                <label htmlFor="street" className="customer-form-label">Street Address</label>
                 <input
                   type="text"
                   id="street"
                   name="address.street"
                   value={formData.address.street}
                   onChange={handleChange}
-                  className="form-input"
+                  className="customer-form-input"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="city" className="form-label">City</label>
+              <div className="customer-form-group">
+                <label htmlFor="city" className="customer-form-label">City</label>
                 <input
                   type="text"
                   id="city"
                   name="address.city"
                   value={formData.address.city}
                   onChange={handleChange}
-                  className="form-input"
+                  className="customer-form-input"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="state" className="form-label">State</label>
+              <div className="customer-form-group">
+                <label htmlFor="state" className="customer-form-label">State</label>
                 <input
                   type="text"
-                  id="state"
+                  id="zipCode"
                   name="address.state"
                   value={formData.address.state}
                   onChange={handleChange}
-                  className="form-input"
+                  className="customer-form-input"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="zipCode" className="form-label">ZIP Code</label>
+              <div className="customer-form-group">
+                <label htmlFor="zipCode" className="customer-form-label">ZIP Code</label>
                 <input
                   type="text"
                   id="zipCode"
                   name="address.zipCode"
                   value={formData.address.zipCode}
                   onChange={handleChange}
-                  className="form-input"
+                  className="customer-form-input"
                 />
               </div>
             </div>
           </div>
 
-          <div className="preferences-section">
-            <h3>Preferences</h3>
+          <div className="customer-preferences-section">
+            <h3 className="customer-section-title">Preferences</h3>
             
-            <div className="form-group">
-              <label className="form-label">Dietary Restrictions</label>
-              <div className="dietary-restrictions">
+            <div className="customer-form-group">
+              <label className="customer-form-label">Dietary Restrictions</label>
+              <div className="customer-dietary-restrictions">
                 {dietaryOptions.map(option => (
-                  <label key={option} className="dietary-checkbox">
+                  <label key={option} className="customer-dietary-checkbox">
                     <input
                       type="checkbox"
                       checked={formData.preferences.dietaryRestrictions.includes(option)}
@@ -286,14 +296,14 @@ const handleLoyaltyPointsUpdate = async (operation) => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="notes" className="form-label">Notes</label>
+            <div className="customer-form-group">
+              <label htmlFor="notes" className="customer-form-label">Notes</label>
               <textarea
                 id="notes"
                 name="preferences.notes"
                 value={formData.preferences.notes}
                 onChange={handleChange}
-                className="form-textarea"
+                className="customer-form-textarea"
                 rows="3"
                 placeholder="Any special notes about the customer..."
               />

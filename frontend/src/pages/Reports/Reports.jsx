@@ -76,154 +76,217 @@ const Reports = () => {
     const avgOrderValue = totalOrders ? totalSales / totalOrders : 0;
 
     return (
-      <>
-        <div className="report-summary">
-          <div className="summary-card">
-            <div className="summary-value">${totalSales.toFixed(2)}</div>
-            <div className="summary-label">Total Revenue</div>
+      <div className="reports-grid">
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <DollarSign size={24} />
+            </div>
+            <div className="report-title">Sales Overview</div>
           </div>
-          <div className="summary-card">
-            <div className="summary-value">{totalOrders}</div>
-            <div className="summary-label">Total Orders</div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-value">${avgOrderValue.toFixed(2)}</div>
-            <div className="summary-label">Average Order Value</div>
+          <div className="report-content">
+            <div className="report-metrics">
+              <div className="metric-item">
+                <div className="metric-value">Nrs {(totalSales || 0).toFixed(2)}</div>
+                <div className="metric-label">Total Revenue</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">{totalOrders || 0}</div>
+                <div className="metric-label">Total Orders</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">Nrs {(avgOrderValue || 0).toFixed(2)}</div>
+                <div className="metric-label">Average Order Value</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="chart-container">
-          <h3 className="chart-title">Daily Sales Trend</h3>
-          <div className="chart-wrapper">
-            <BarChart3 size={48} color="#d1d5db" />
-            <p style={{ marginLeft: 16, color: '#6b7280' }}>
-              Chart visualization would be implemented here
-            </p>
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <BarChart3 size={24} />
+            </div>
+            <div className="report-title">Daily Sales Trend</div>
+          </div>
+          <div className="report-content">
+            <div className="chart-placeholder">
+              <div className="chart-placeholder-icon">
+                <BarChart3 size={48} />
+              </div>
+              <div className="chart-placeholder-text">
+                Chart visualization would be implemented here
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="chart-container">
-          <h3 className="chart-title">Sales by Category</h3>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Revenue</th>
-                <th>Quantity Sold</th>
-                <th>Percentage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.salesByCategory?.map((category, idx) => (
-                <tr key={idx}>
-                  <td style={{ textTransform: 'capitalize' }}>{category._id}</td>
-                  <td>${category.total.toFixed(2)}</td>
-                  <td>{category.quantity}</td>
-                  <td>{((category.total / totalSales) * 100).toFixed(1)}%</td>
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <Package size={24} />
+            </div>
+            <div className="report-title">Sales by Category</div>
+          </div>
+          <div className="report-content">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Revenue</th>
+                  <th>Quantity Sold</th>
+                  <th>Percentage</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {reportData.salesByCategory?.map((category, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textTransform: 'capitalize' }}>{category._id}</td>
+                    <td>Nrs{(category.total || 0).toFixed(2)}</td>
+                    <td>{category.quantity || 0}</td>
+                    <td>{totalSales ? (((category.total || 0) / totalSales) * 100).toFixed(1) : '0.0'}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div className="chart-container">
-          <h3 className="chart-title">Sales by Payment Method</h3>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Payment Method</th>
-                <th>Revenue</th>
-                <th>Orders</th>
-                <th>Percentage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.salesByPayment?.map((payment, idx) => (
-                <tr key={idx}>
-                  <td style={{ textTransform: 'capitalize' }}>{payment._id}</td>
-                  <td>${payment.total.toFixed(2)}</td>
-                  <td>{payment.count}</td>
-                  <td>{((payment.total / totalSales) * 100).toFixed(1)}%</td>
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <DollarSign size={24} />
+            </div>
+            <div className="report-title">Sales by Payment Method</div>
+          </div>
+          <div className="report-content">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Payment Method</th>
+                  <th>Revenue</th>
+                  <th>Orders</th>
+                  <th>Percentage</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {reportData.salesByPayment?.map((payment, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textTransform: 'capitalize' }}>{payment._id}</td>
+                    <td>Nrs{(payment.total || 0).toFixed(2)}</td>
+                    <td>{payment.count || 0}</td>
+                    <td>{totalSales ? (((payment.total || 0) / totalSales) * 100).toFixed(1) : '0.0'}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </>
+      </div>
     );
   };
 
   const renderProductReport = () => {
-  if (!reportData || !Array.isArray(reportData)) return null; // <- ADD THIS GUARD
+    if (!reportData || !Array.isArray(reportData)) return null;
 
-  return (
-    <div className="chart-container">
-      <h3 className="chart-title">Top Performing Products</h3>
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Product Name</th>
-            <th>Quantity Sold</th>
-            <th>Revenue</th>
-            <th>Average Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reportData.map((product, idx) => (
-            <tr key={idx}>
-              <td>{product.name}</td>
-              <td>{product.totalQuantity}</td>
-              <td>Nrs{product.totalRevenue.toFixed(2)}</td>
-              <td>Nrs{product.avgPrice.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+    return (
+      <div className="reports-grid">
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <Package size={24} />
+            </div>
+            <div className="report-title">Top Performing Products</div>
+          </div>
+          <div className="report-content">
+            <div className="chart-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Quantity Sold</th>
+                    <th>Revenue</th>
+                    <th>Average Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportData.map((product, idx) => (
+                    <tr key={idx}>
+                      <td>{product.name}</td>
+                      <td>{product.totalQuantity || 0}</td>
+                      <td>Nrs{(product.totalRevenue || 0).toFixed(2)}</td>
+                      <td>Nrs{(product.avgPrice || 0).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
 
   const renderCustomerReport = () => {
     if (!reportData) return null;
 
     return (
-      <>
-        <div className="report-summary">
-          <div className="summary-card">
-            <div className="summary-value">{reportData.topCustomers?.length || 0}</div>
-            <div className="summary-label">Total Customers</div>
+      <div className="reports-grid">
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <Users size={24} />
+            </div>
+            <div className="report-title">Customer Insights</div>
           </div>
-          <div className="summary-card">
-            <div className="summary-value">{reportData.customerAcquisition?.length || 0}</div>
-            <div className="summary-label">New This Month</div>
+          <div className="report-content">
+            <div className="report-metrics">
+              <div className="metric-item">
+                <div className="metric-value">{reportData.topCustomers?.length || 0}</div>
+                <div className="metric-label">Total Customers</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">{reportData.customerAcquisition?.length || 0}</div>
+                <div className="metric-label">New This Month</div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="chart-container">
-          <h3 className="chart-title">Top Customers by Spending</h3>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Customer Name</th>
-                <th>Total Spent</th>
-                <th>Visit Count</th>
-                <th>Loyalty Points</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.topCustomers?.map((customer, idx) => (
-                <tr key={idx}>
-                  <td>{customer.name}</td>
-                  <td>Nrs{customer.totalSpent.toFixed(2)}</td>
-                  <td>{customer.visitCount}</td>
-                  <td>{customer.loyaltyPoints}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <Users size={24} />
+            </div>
+            <div className="report-title">Top Customers by Spending</div>
+          </div>
+          <div className="report-content">
+            <div className="chart-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Total Spent</th>
+                    <th>Visit Count</th>
+                    <th>Loyalty Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportData.topCustomers?.map((customer, idx) => (
+                    <tr key={idx}>
+                      <td>{customer.name}</td>
+                      <td>Nrs{(customer.totalSpent || 0).toFixed(2)}</td>
+                      <td>{customer.visitCount || 0}</td>
+                      <td>{customer.loyaltyPoints || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </>
+      </div>
     );
   };
 
@@ -231,83 +294,111 @@ const Reports = () => {
     if (!reportData) return null;
 
     return (
-      <>
-        <div className="report-summary">
-          <div className="summary-card">
-            <div className="summary-value">{reportData.inventoryLevels?.length || 0}</div>
-            <div className="summary-label">Total Items</div>
+      <div className="reports-grid">
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <Package size={24} />
+            </div>
+            <div className="report-title">Inventory Overview</div>
           </div>
-          <div className="summary-card">
-            <div className="summary-value">{reportData.lowStockItems?.length || 0}</div>
-            <div className="summary-label">Low Stock Items</div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-value">Nrs{reportData.totalValue?.toFixed(2) || '0.00'}</div>
-            <div className="summary-label">Total Inventory Value</div>
+          <div className="report-content">
+            <div className="report-metrics">
+              <div className="metric-item">
+                <div className="metric-value">{reportData.inventoryLevels?.length || 0}</div>
+                <div className="metric-label">Total Items</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">{reportData.lowStockItems?.length || 0}</div>
+                <div className="metric-label">Low Stock Items</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">Nrs{reportData.totalValue?.toFixed(2) || '0.00'}</div>
+                <div className="metric-label">Total Inventory Value</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="chart-container">
-          <h3 className="chart-title">Current Inventory Levels</h3>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Current Stock</th>
-                <th>Min Stock</th>
-                <th>Value</th>
-                <th>Supplier</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.inventoryLevels?.map((item, idx) => (
-                <tr key={idx}>
-                  <td>{item.name}</td>
-                  <td>{item.currentStock} {item.unit}</td>
-                  <td>{item.minStock} {item.unit}</td>
-                  <td>Nrs{(item.currentStock * item.costPerUnit).toFixed(2)}</td>
-                  <td>{item.supplier?.name}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <Package size={24} />
+            </div>
+            <div className="report-title">Current Inventory Levels</div>
+          </div>
+          <div className="report-content">
+            <div className="chart-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Current Stock</th>
+                    <th>Min Stock</th>
+                    <th>Value</th>
+                    <th>Supplier</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportData.inventoryLevels?.map((item, idx) => (
+                    <tr key={idx}>
+                      <td>{item.name}</td>
+                      <td>{item.currentStock || 0} {item.unit}</td>
+                      <td>{item.minStock || 0} {item.unit}</td>
+                      <td>Nrs{((item.currentStock || 0) * (item.costPerUnit || 0)).toFixed(2)}</td>
+                      <td>{item.supplier?.name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {reportData.lowStockItems?.length > 0 && (
-          <div className="chart-container">
-            <h3 className="chart-title">Low Stock Alerts</h3>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Current Stock</th>
-                  <th>Min Stock</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.lowStockItems.map((item, idx) => (
-                  <tr key={idx}>
-                    <td>{item.name}</td>
-                    <td style={{ color: '#ef4444', fontWeight: '600' }}>
-                      {item.currentStock} {item.unit}
-                    </td>
-                    <td>{item.minStock} {item.unit}</td>
-                    <td>
-                      <span style={{ 
-                        color: item.currentStock === 0 ? '#ef4444' : '#f59e0b',
-                        fontWeight: '500'
-                      }}>
-                        {item.currentStock === 0 ? 'Out of Stock' : 'Low Stock'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="report-card">
+            <div className="report-header">
+              <div className="report-icon">
+                <Package size={24} />
+              </div>
+              <div className="report-title">Low Stock Alerts</div>
+            </div>
+            <div className="report-content">
+              <div className="chart-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Item Name</th>
+                      <th>Current Stock</th>
+                      <th>Min Stock</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.lowStockItems.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>{item.name}</td>
+                        <td style={{ color: '#ef4444', fontWeight: '600' }}>
+                          {item.currentStock} {item.unit}
+                        </td>
+                        <td>{item.minStock} {item.unit}</td>
+                        <td>
+                          <span style={{ 
+                            color: item.currentStock === 0 ? '#ef4444' : '#f59e0b',
+                            fontWeight: '500'
+                          }}>
+                            {item.currentStock === 0 ? 'Out of Stock' : 'Low Stock'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
-      </>
+      </div>
     );
   };
 
@@ -315,50 +406,69 @@ const Reports = () => {
     if (!reportData) return null;
 
     return (
-      <>
-        <div className="report-summary">
-          <div className="summary-card">
-            <div className="summary-value">Nrs{reportData.summary?.totalRevenue?.toFixed(2) || '0.00'}</div>
-            <div className="summary-label">Total Revenue</div>
+      <div className="reports-grid">
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <TrendingUp size={24} />
+            </div>
+            <div className="report-title">Financial Overview</div>
           </div>
-          <div className="summary-card">
-            <div className="summary-value">Nrs{reportData.summary?.totalTax?.toFixed(2) || '0.00'}</div>
-            <div className="summary-label">Total Tax</div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-value">Nrs{reportData.summary?.totalDiscount?.toFixed(2) || '0.00'}</div>
-            <div className="summary-label">Total Discounts</div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-value">{reportData.summary?.orderCount || 0}</div>
-            <div className="summary-label">Total Orders</div>
+          <div className="report-content">
+            <div className="report-metrics">
+              <div className="metric-item">
+                <div className="metric-value">Nrs{reportData.summary?.totalRevenue?.toFixed(2) || '0.00'}</div>
+                <div className="metric-label">Total Revenue</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">Nrs{reportData.summary?.totalTax?.toFixed(2) || '0.00'}</div>
+                <div className="metric-label">Total Tax</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">Nrs{reportData.summary?.totalDiscount?.toFixed(2) || '0.00'}</div>
+                <div className="metric-label">Total Discounts</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">{reportData.summary?.orderCount || 0}</div>
+                <div className="metric-label">Total Orders</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="chart-container">
-          <h3 className="chart-title">Monthly Revenue Trend</h3>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Revenue</th>
-                <th>Orders</th>
-                <th>Average Order Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.monthlyRevenue?.map((month, idx) => (
-                <tr key={idx}>
-                  <td>{month._id}</td>
-                  <td>Nrs{month.revenue.toFixed(2)}</td>
-                  <td>{month.orders}</td>
-                  <td>Nrs{(month.revenue / month.orders).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="report-card">
+          <div className="report-header">
+            <div className="report-icon">
+              <TrendingUp size={24} />
+            </div>
+            <div className="report-title">Monthly Revenue Trend</div>
+          </div>
+          <div className="report-content">
+            <div className="chart-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Revenue</th>
+                    <th>Orders</th>
+                    <th>Average Order Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportData.monthlyRevenue?.map((month, idx) => (
+                    <tr key={idx}>
+                      <td>{month._id}</td>
+                      <td>Nrs{(month.revenue || 0).toFixed(2)}</td>
+                      <td>{month.orders || 0}</td>
+                      <td>Nrs{(month.orders ? ((month.revenue || 0) / month.orders) : 0).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </>
+      </div>
     );
   };
 
@@ -398,10 +508,26 @@ const Reports = () => {
   };
 
   return (
-    <div className="reports-page">
-      <div className="page-header">
-        <h1>Reports & Analytics</h1>
-        <p>Comprehensive business insights and performance metrics</p>
+    <div className="reports">
+      <div className="reports-header">
+        <h1 className="reports-title">Reports & Analytics</h1>
+        <p className="reports-subtitle">Comprehensive business insights and performance metrics</p>
+      </div>
+
+      <div className="reports-nav">
+        {tabs.map(tab => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              className={`report-tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon className="icon" size={20} />
+              <span className="label">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="reports-filters">
@@ -423,44 +549,31 @@ const Reports = () => {
             className="filter-input"
           />
         </div>
-        <button className="btn btn-primary" onClick={fetchReportData}>
-         
+        <button className="generate-btn" onClick={fetchReportData}>
           Generate Report
         </button>
       </div>
 
-      <div className="reports-tabs">
-        {tabs.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              className={`tab ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <Icon size={16} />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      {renderReportContent()}
 
-      <div className="report-content">
-        {renderReportContent()}
-
-        {reportData && (
+      {reportData && (
+        <div className="export-section">
+          <div className="export-header">
+            <h3 className="export-title">Export Options</h3>
+            <p className="export-description">Download your reports in various formats for further analysis.</p>
+          </div>
           <div className="export-actions">
-            <button className="btn btn-secondary" onClick={handleExportPDF}>
+            <button className="export-btn export-btn-secondary" onClick={handleExportPDF}>
               <FileText size={16} />
               Export PDF
             </button>
-            <button className="btn btn-secondary" onClick={handleExportExcel}>
+            <button className="export-btn export-btn-primary" onClick={handleExportExcel}>
               <Download size={16} />
               Export Excel
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

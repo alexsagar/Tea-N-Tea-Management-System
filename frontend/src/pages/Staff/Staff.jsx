@@ -95,6 +95,23 @@ const Staff = () => {
     }
   };
 
+  const handlePermanentDelete = async (staffId) => {
+    if (window.confirm('Are you sure you want to permanently delete this inactive staff member? This action cannot be undone.')) {
+      try {
+        await axios.delete(`${API_BASE}/staff/${staffId}/permanent`);
+        
+        // Remove the staff member from local state
+        setStaffMembers(prev => prev.filter(staff => staff._id !== staffId));
+        
+        // Show success message
+        console.log('Staff member permanently deleted');
+      } catch (error) {
+        console.error('Error permanently deleting staff member:', error);
+        alert('Failed to delete staff member. Please try again.');
+      }
+    }
+  };
+
   const handleModalClose = () => {
     setShowModal(false);
     setSelectedStaff(null);
@@ -125,86 +142,130 @@ const Staff = () => {
   }
 
   return (
-    <div className="staff-page">
-      <div className="page-header">
-        <div className="header-content">
-          <h1>Staff Management</h1>
-          <p>Manage your team members, roles, and permissions</p>
+    <div className="staff">
+      <div className="staff-header">
+        <div>
+          <h1 className="staff-title">Staff Management</h1>
         </div>
-        {hasPermission('staff', 'create') && (
-          <button className="btn btn-primary" onClick={handleAddStaff}>
-            <Plus size={20} />
-            Add Staff Member
-          </button>
-        )}
+        <button className="add-staff-btn" onClick={() => setShowModal(true)}>
+          <Plus size={16} />
+          Add Staff Member
+        </button>
       </div>
 
       <div className="staff-filters">
-        <div className="search-bar">
-          <div className="search-input-wrapper">
-            
-            <input
-              type="text"
-              placeholder="Search staff members..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-        </div>
-
-        <div className="filter-controls">
-          <div className="filter-group">
-            
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="">All Roles</option>
-              {roles.map(role => (
-                <option key={role} value={role}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="filter-group">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
+        <input
+          type="text"
+          placeholder="Search staff members..."
+          className="search-input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className="filter-select"
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+        >
+          <option value="">All Roles</option>
+          {roles.map(role => (
+            <option key={role} value={role}>
+              {role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </option>
+          ))}
+        </select>
+        <select
+          className="filter-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
       </div>
 
-      <div className="staff-stats">
-        <div className="stat-item">
-          <span className="stat-value">{filteredStaff.length}</span>
-          <span className="stat-label">Total Staff</span>
+      <div className="staff-table">
+        <div className="table-header">
+          <h2 className="table-title">Staff Members</h2>
         </div>
-        <div className="stat-item">
-          <span className="stat-value">{filteredStaff.filter(staff => staff.isActive).length}</span>
-          <span className="stat-label">Active</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{filteredStaff.filter(staff => !staff.isActive).length}</span>
-          <span className="stat-label">Inactive</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{roles.length}</span>
-          <span className="stat-label">Roles</span>
-        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Role</th>
+              <th>Contact</th>
+              <th>Schedule</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredStaff.map(staff => (
+              <tr key={staff._id}>
+                <td>
+                  <div className="staff-name">{staff.name}</div>
+                  <div className="staff-id">ID: {staff.employeeId}</div>
+                </td>
+                <td>
+                  <span className="staff-role">{staff.role}</span>
+                </td>
+                <td>
+                  <div className="staff-contact">
+                    <div className="contact-phone">{staff.phone}</div>
+                    {staff.email && (
+                      <div className="contact-email">{staff.email}</div>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="staff-schedule">
+                    <div className="schedule-days">{staff.workDays?.join(', ') || 'Not set'}</div>
+                    <div className="schedule-hours">{staff.workHours || 'Not set'}</div>
+                  </div>
+                </td>
+                <td>
+                  <span className={`staff-status ${staff.isActive ? 'active' : 'inactive'}`}>
+                    {staff.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td>
+                  <div className="staff-actions">
+                    <button
+                      className="action-btn edit"
+                      onClick={() => handleEditStaff(staff)}
+                      title="Edit staff member"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    {hasPermission('staff', 'delete') && (
+                      staff.isActive ? (
+                        <button
+                          className="action-btn delete"
+                          onClick={() => handleDeleteStaff(staff._id)}
+                          title="Deactivate staff member"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      ) : (
+                        <button
+                          className="action-btn delete permanent"
+                          onClick={() => handlePermanentDelete(staff._id)}
+                          title="Permanently delete staff member"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {filteredStaff.length === 0 ? (
+      {filteredStaff.length === 0 && (
         <div className="empty-state">
-          <UserCheck size={64} />
           <h3>No staff members found</h3>
           <p>
             {searchTerm || roleFilter || statusFilter
@@ -212,109 +273,17 @@ const Staff = () => {
               : 'Start by adding your first staff member'
             }
           </p>
-          {hasPermission('staff', 'create') && !searchTerm && !roleFilter && !statusFilter && (
-            <button className="btn btn-primary" onClick={handleAddStaff}>
-              <Plus size={20} />
-              Add First Staff Member
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="staff-grid">
-          {filteredStaff.map(staff => (
-            <div key={staff._id} className={`staff-card ${!staff.isActive ? 'inactive' : ''}`}>
-              <div className="staff-card-header">
-                <div 
-                  className="staff-avatar"
-                  style={{ background: getRoleColor(staff.role) }}
-                >
-                  {staff.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="staff-info">
-                  <h3 className="staff-name">{staff.name}</h3>
-                  <p className="staff-role">{staff.role}</p>
-                  <p className="staff-email">{staff.email}</p>
-                </div>
-              </div>
-
-              <div className="staff-card-content">
-                <div className="staff-details">
-                  {staff.phone && (
-                    <div className="detail-item">
-                      <Phone size={16} />
-                      <span>{staff.phone}</span>
-                    </div>
-                  )}
-                  
-                  <div className="detail-item">
-                    <Mail size={16} />
-                    <span>{staff.email}</span>
-                  </div>
-
-                  {staff.address && (
-                    <div className="detail-item">
-                      <MapPin size={16} />
-                      <span>{staff.address}</span>
-                    </div>
-                  )}
-
-                  <div className="detail-item">
-                    <Calendar size={16} />
-                    <span>Joined {new Date(staff.createdAt).toLocaleDateString()}</span>
-                  </div>
-
-                  <div className="detail-item">
-                    <span className={`status-badge ${staff.isActive ? 'active' : 'inactive'}`}>
-                      {staff.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-
-                  {staff.permissions && staff.permissions.length > 0 && (
-                    <div className="detail-item">
-                      <span>Permissions:</span>
-                      <div className="permissions-list">
-                        {staff.permissions.map((perm, index) => (
-                          <span key={index} className="permission-tag">
-                            {perm.module}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="staff-card-actions">
-  {hasPermission('staff', 'update') && (
-    <button
-      className="action-btn edit-btn"
-      onClick={() => handleEditStaff(staff)}
-      title="Edit staff member"
-    >
-      Edit
-    </button>
-  )}
-  {hasPermission('staff', 'delete') && (
-    <button
-      className="action-btn delete-btn"
-      onClick={() => handleDeleteStaff(staff._id)}
-      title="Deactivate staff member"
-    >
-      Delete
-    </button>
-  )}
-</div>
-
-            </div>
-          ))}
         </div>
       )}
 
       {showModal && (
         <StaffModal
           staff={selectedStaff}
-          onClose={handleModalClose}
-          onSave={handleModalSave}
+          onClose={() => setShowModal(false)}
+          onSave={() => {
+            fetchStaffMembers();
+            setShowModal(false);
+          }}
         />
       )}
     </div>

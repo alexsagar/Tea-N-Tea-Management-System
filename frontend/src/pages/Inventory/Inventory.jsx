@@ -28,8 +28,8 @@ const Inventory = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [stockFilter, setStockFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [showStockModal, setShowStockModal] = useState(false);
-  const [showStockInModal, setShowStockInModal] = useState(false); // <-- NEW STATE
+  const [showStockUpdateModal, setShowStockUpdateModal] = useState(false);
+  const [showStockInModal, setShowStockInModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const { hasPermission } = useAuth();
   const { socket } = useSocket();
@@ -101,7 +101,7 @@ const Inventory = () => {
 
   const handleUpdateStock = (item) => {
     setSelectedItem(item);
-    setShowStockModal(true);
+    setShowStockUpdateModal(true);
   };
 
   const handleDeleteItem = async (itemId) => {
@@ -158,100 +158,139 @@ const Inventory = () => {
   }
 
   return (
-    <div className="inventory-page">
-      <div className="page-header">
-        <div className="header-content">
-          <h1>Inventory Management</h1>
-          <p>Track stock levels, manage suppliers, and monitor inventory costs</p>
-        </div>
+    <div className="inventory">
+      <div className="inventory-header">
         <div>
-          {hasPermission('inventory', 'create') && (
-            <>
-              <button
-                className="btn btn-secondary"
-                style={{ marginRight: 10 }}
-                onClick={() => setShowStockInModal(true)}
-              >
-                <Plus size={20} />
-                Add Stock-In
-              </button>
-              <button className="btn btn-primary" onClick={handleAddItem}>
-                <Plus size={20} />
-                Add Inventory Item
-              </button>
-            </>
-          )}
+          <h1 className="inventory-title">Inventory</h1>
+        </div>
+        <div className="inventory-actions">
+          <button className="add-item-btn" onClick={() => setShowModal(true)}>
+            <Plus size={16} />
+            Add Item
+          </button>
+          <button className="stock-in-btn" onClick={() => setShowStockInModal(true)}>
+            <Package size={16} />
+            Stock In
+          </button>
         </div>
       </div>
 
       <div className="inventory-filters">
-        <div className="search-bar">
-          <div className="search-input-wrapper">
-            <input
-              type="text"
-              placeholder="Search inventory items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-        </div>
-
-        <div className="filter-controls">
-          <div className="filter-group">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="filter-group">
-            <select
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="">All Stock Levels</option>
-              <option value="low">Low Stock</option>
-              <option value="out">Out of Stock</option>
-            </select>
-          </div>
-        </div>
+        <input
+          type="text"
+          placeholder="Search inventory items..."
+          className="search-input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className="filter-select"
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+        >
+          <option value="">All Categories</option>
+          {categories.map(category => (
+            <option key={category} value={category}>
+              {category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </option>
+          ))}
+        </select>
+        <select
+          className="filter-select"
+          value={stockFilter}
+          onChange={(e) => setStockFilter(e.target.value)}
+        >
+          <option value="">All Stock Levels</option>
+          <option value="low">Low Stock</option>
+          <option value="out">Out of Stock</option>
+          <option value="normal">Normal Stock</option>
+        </select>
       </div>
 
-      <div className="inventory-stats">
-        <div className="stat-item">
-          <span className="stat-value">{filteredItems.length}</span>
-          <span className="stat-label">Total Items</span>
+      <div className="inventory-table">
+        <div className="table-header">
+          <h2 className="table-title">Inventory Items</h2>
         </div>
-        <div className="stat-item">
-          <span className="stat-value">
-            {filteredItems.filter(item => getStockStatus(item) === 'low').length}
-          </span>
-          <span className="stat-label">Low Stock</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">
-            {filteredItems.filter(item => getStockStatus(item) === 'out').length}
-          </span>
-          <span className="stat-label">Out of Stock</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">Nrs {calculateTotalValue().toFixed(2)}</span>
-          <span className="stat-label">Total Value</span>
-        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Stock Level</th>
+              <th>Unit Cost</th>
+              <th>Total Value</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredItems.map(item => (
+              <tr key={item._id}>
+                <td>
+                  <div className="item-name">{item.name}</div>
+                  {item.description && (
+                    <div className="item-description">{item.description}</div>
+                  )}
+                </td>
+                <td>
+                  <span className="item-category">{item.category}</span>
+                </td>
+                <td>
+                  <div className="stock-level">
+                    <span className={`stock-badge ${getStockStatus(item)}`}>
+                      {item.currentStock} {item.unit}
+                    </span>
+                    {item.currentStock <= item.reorderPoint && (
+                      <span className="low-stock-warning">Low Stock</span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="unit-cost">Nrs {(item.unitCost || 0).toFixed(2)}</div>
+                </td>
+                <td>
+                  <div className="total-value">Nrs {((item.currentStock || 0) * (item.unitCost || 0)).toFixed(2)}</div>
+                </td>
+                <td>
+                  <div className="last-updated">
+                    {new Date(item.updatedAt).toLocaleDateString()}
+                  </div>
+                </td>
+                <td>
+                  <div className="item-actions">
+                    <button
+                      className="action-btn edit"
+                      onClick={() => handleEditItem(item)}
+                      title="Edit item"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      className="action-btn edit"
+                      onClick={() => handleUpdateStock(item)}
+                      title="Update stock"
+                    >
+                      <Package size={16} />
+                    </button>
+                    {hasPermission('inventory', 'delete') && (
+                      <button
+                        className="action-btn delete"
+                        onClick={() => handleDeleteItem(item._id)}
+                        title="Delete item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {filteredItems.length === 0 ? (
+      {filteredItems.length === 0 && (
         <div className="empty-state">
-          <Package size={64} />
           <h3>No inventory items found</h3>
           <p>
             {searchTerm || categoryFilter || stockFilter
@@ -259,126 +298,6 @@ const Inventory = () => {
               : 'Start by adding your first inventory item'
             }
           </p>
-          {hasPermission('inventory', 'create') && !searchTerm && !categoryFilter && !stockFilter && (
-            <button className="btn btn-primary" onClick={handleAddItem}>
-              <Plus size={20} className="first-item" />
-              Add First Item
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="inventory-table-container">
-          <table className="inventory-table">
-            <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Category</th>
-                <th>Current Stock</th>
-                <th>Min/Max Stock</th>
-                <th>Cost per Unit</th>
-                <th>Total Value</th>
-                <th>Supplier</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.map(item => {
-                const status = getStockStatus(item);
-                return (
-                  <tr key={item._id} className={status === 'out' ? 'out-of-stock' : ''}>
-                    <td>
-                      <div className="item-info">
-                        <div className="item-name">{item.name}</div>
-                        {item.batchNumber && (
-                          <div className="batch-number">Batch: {item.batchNumber}</div>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="category-badge">
-                        {item.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="stock-info">
-                        <div className="current-stock">
-                          {item.currentStock} {item.unit}
-                        </div>
-                        {item.expiryDate && (
-                          <div className="expiry-date">
-                            Expires: {new Date(item.expiryDate).toLocaleDateString()}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="stock-limits">
-                        <div>Min: {item.minStock} {item.unit}</div>
-                        <div>Max: {item.maxStock} {item.unit}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="cost-info">
-                        Nrs {item.costPerUnit.toFixed(2)} / {item.unit}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="total-value">
-                        Nrs {(item.currentStock * item.costPerUnit).toFixed(2)}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="supplier-info">
-                        <div className="supplier-name">{item.supplier?.name}</div>
-                        <div className="supplier-contact">{item.supplier?.contactPerson}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div 
-                        className="status-badge"
-                        style={{ color: getStockStatusColor(status) }}
-                      >
-                        {getStockStatusIcon(status)}
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="inventory-actions">
-                        {hasPermission('inventory', 'update') && (
-                          <>
-                            <button
-                              className="action-btn stock-btn"
-                              onClick={() => handleUpdateStock(item)}
-                              title="Update stock"
-                            >
-                              <Package size={16} />
-                            </button>
-                            <button
-                              className="action-btn edit-btn"
-                              onClick={() => handleEditItem(item)}
-                              title="Edit item"
-                            >
-                              <Edit size={16} />
-                            </button>
-                          </>
-                        )}
-                        {hasPermission('inventory', 'delete') && (
-                          <button
-                            className="action-btn delete-btn"
-                            onClick={() => handleDeleteItem(item._id)}
-                            title="Delete item"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       )}
 
@@ -393,24 +312,23 @@ const Inventory = () => {
         />
       )}
 
-      {showStockModal && (
-        <StockUpdateModal
-          item={selectedItem}
-          onClose={() => setShowStockModal(false)}
-          onSave={() => {
-            fetchInventoryItems();
-            setShowStockModal(false);
-          }}
-        />
-      )}
-
-      {/* Add StockInModal at the bottom */}
       {showStockInModal && (
         <StockInModal
           onClose={() => setShowStockInModal(false)}
           onSave={() => {
             fetchInventoryItems();
             setShowStockInModal(false);
+          }}
+        />
+      )}
+
+      {showStockUpdateModal && (
+        <StockUpdateModal
+          item={selectedItem}
+          onClose={() => setShowStockUpdateModal(false)}
+          onSave={() => {
+            fetchInventoryItems();
+            setShowStockUpdateModal(false);
           }}
         />
       )}

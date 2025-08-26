@@ -157,213 +157,109 @@ const Tables = () => {
   }
 
   return (
-    <div className="tables-page">
-      <div className="page-header">
-        <div className="header-content">
-          <h1>Table Management</h1>
-          <p>Manage restaurant tables, reservations, and seating arrangements</p>
+    <div className="tables">
+      <div className="tables-header">
+        <div>
+          <h1 className="tables-title">Tables</h1>
         </div>
-        {hasPermission('tables', 'create') && (
-          <button className="btn btn-primary" onClick={handleAddTable}>
-            <Plus size={20} />
-            Add Table
-          </button>
-        )}
+        <button className="add-table-btn" onClick={() => setShowModal(true)}>
+          <Plus size={16} />
+          Add Table
+        </button>
       </div>
 
       <div className="tables-filters">
-        <div className="search-bar">
-          <div className="search-input-wrapper">
-            <input
-              type="text"
-              placeholder="Search tables..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-              aria-label="Search tables"
-            />
-          </div>
-        </div>
-
-        <div className="filter-controls">
-          <div className="filter-group">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="filter-select"
-              aria-label="Filter by status"
-            >
-              <option value="">All Status</option>
-              {statuses.map(status => (
-                <option key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="filter-group">
-            <select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              className="filter-select"
-              aria-label="Filter by location"
-            >
-              <option value="">All Locations</option>
-              {locations.map(location => (
-                <option key={location} value={location}>
-                  {location.charAt(0).toUpperCase() + location.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <input
+          type="text"
+          placeholder="Search tables..."
+          className="search-input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className="filter-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="available">Available</option>
+          <option value="occupied">Occupied</option>
+          <option value="reserved">Reserved</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
       </div>
 
-      <div className="tables-stats">
-        <div className="stat-item">
-          <span className="stat-value">{stats.totalTables}</span>
-          <span className="stat-label">Total Tables</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{stats.availableTables}</span>
-          <span className="stat-label">Available</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{stats.occupiedTables}</span>
-          <span className="stat-label">Occupied</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{stats.reservedTables}</span>
-          <span className="stat-label">Reserved</span>
-        </div>
-      </div>
-
-      {filteredTables.length === 0 ? (
-        <div className="empty-state">
-          <TableIcon size={64} />
-          <h3>No tables found</h3>
-          <p>
-            {searchTerm || statusFilter || locationFilter
-              ? 'Try adjusting your search or filter criteria'
-              : 'Start by adding your first table'
-            }
-          </p>
-          {hasPermission('tables', 'create') && !searchTerm && !statusFilter && !locationFilter && (
-            <button className="btn btn-primary" onClick={handleAddTable}>
-              <Plus size={20} className="first-table"/>
-              Add First Table
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="tables-grid">
-          {filteredTables.map(table => (
-            <div key={table._id} className={`table-card ${table.status}`}>
-              <div className="table-card-header">
-                <div className="table-info">
-                  <div className={`table-icon ${table.status}`} style={{ backgroundColor: getStatusColor(table.status) }}>
-                    {table.number}
-                  </div>
-                  <div className="table-details">
-                    <h3>Table {table.number}</h3>
-                    <div className="table-capacity">
-                      Capacity: {table.capacity} people
-                    </div>
-                  </div>
+      <div className="tables-grid">
+        {filteredTables.map(table => (
+          <div key={table._id} className="table-card">
+            <div className="table-header">
+              <h3 className="table-name">Table {table.number}</h3>
+              <span className={`table-status ${table.status}`}>
+                {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
+              </span>
+            </div>
+            <div className="table-content">
+              <div className="table-info">
+                <div className="table-capacity">
+                  <span className="capacity-label">Capacity:</span>
+                  <span className="capacity-value">{table.capacity} people</span>
                 </div>
-                <span className={`status-badge ${table.status}`}>
-                  {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
-                </span>
-              </div>
-
-              <div className="table-card-content">
-                <div className="table-meta">
-                  <div className="meta-item">
-                    <MapPin size={16} />
-                    <span className="location-badge">{table.location.charAt(0).toUpperCase() + table.location.slice(1)}</span>
-                  </div>
-                  
-                  <div className="meta-item">
-                    <Users size={16} />
-                    <span>Seats {table.capacity}</span>
-                  </div>
-
-                  <div className="meta-item">
-                    <Clock size={16} />
-                    <span>
-                      Last cleaned: {table.lastCleaned ? new Date(table.lastCleaned).toLocaleDateString() : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-
-                {table.currentOrder && (
-                  <div className="order-info">
-                    <div className="order-number">
-                      Order: #{table.currentOrder.orderNumber}
-                    </div>
-                    <div className="order-total">
-                      Total: ${table.currentOrder.total?.toFixed(2)}
-                    </div>
+                {table.location && (
+                  <div className="table-location">
+                    <span className="location-label">Location:</span>
+                    <span className="location-value">{table.location}</span>
                   </div>
                 )}
-
-                {table.reservation && (
-                  <div className="reservation-info">
-                    <div className="reservation-customer">
-                      Reserved for: {table.reservation.customer?.name}
-                    </div>
-                    <div className="reservation-time">
-                      Time: {new Date(table.reservation.reservationTime).toLocaleString()}
-                    </div>
+                {table.description && (
+                  <div className="table-description">
+                    <span className="description-label">Description:</span>
+                    <span className="description-value">{table.description}</span>
                   </div>
                 )}
               </div>
-
-              <div className="table-card-actions">
-                {hasPermission('tables', 'update') && (
-                  <>
-                    <button
-                      className="action-btn status-btn"
-                      onClick={() => {
-                        const nextStatus = table.status === 'available' ? 'maintenance' : 'available';
-                        handleUpdateStatus(table._id, nextStatus);
-                      }}
-                      title="Toggle status"
-                      aria-label="Toggle status"
-                    >
-                      <RotateCcw size={16} />
-                    </button>
-                    <button
-                      className="action-btn edit-btn"
-                      onClick={() => handleEditTable(table)}
-                      title="Edit table"
-                      aria-label="Edit table"
-                    >
-                      <Edit size={16} />
-                    </button>
-                  </>
-                )}
+              <div className="table-actions">
+                <button
+                  className="action-btn edit"
+                  onClick={() => handleEditTable(table)}
+                  title="Edit table"
+                >
+                  <Edit size={16} />
+                </button>
                 {hasPermission('tables', 'delete') && (
                   <button
-                    className="action-btn delete-btn"
+                    className="action-btn delete"
                     onClick={() => handleDeleteTable(table._id)}
                     title="Delete table"
-                    aria-label="Delete table"
                   >
                     <Trash2 size={16} />
                   </button>
                 )}
               </div>
             </div>
-          ))}
+          </div>
+        ))}
+      </div>
+
+      {filteredTables.length === 0 && (
+        <div className="empty-state">
+          <h3>No tables found</h3>
+          <p>
+            {searchTerm || statusFilter
+              ? 'Try adjusting your search or filter criteria'
+              : 'Start by adding your first table'
+            }
+          </p>
         </div>
       )}
 
       {showModal && (
         <TableModal
           table={selectedTable}
-          onClose={handleModalClose}
-          onSave={handleModalSave}
+          onClose={() => setShowModal(false)}
+          onSave={() => {
+            fetchTables();
+            setShowModal(false);
+          }}
         />
       )}
     </div>

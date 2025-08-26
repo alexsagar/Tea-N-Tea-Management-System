@@ -126,159 +126,77 @@ const Menu = () => {
   }
 
   return (
-    <div className="menu-page">
-      <div className="page-header">
-        <div className="header-content">
-          <h1>Menu Management</h1>
-          <p>Manage your tea shop menu items, prices, and availability</p>
+    <div className="menu">
+      <div className="menu-header">
+        <div>
+          <h1 className="menu-title">Menu Items</h1>
         </div>
-        {hasPermission('menu', 'create') && (
-          <button className="btn btn-primary" onClick={handleAddItem}>
-            <Plus size={20} />
-            Add Menu Item
-          </button>
-        )}
+        <button className="add-item-btn" onClick={() => setShowModal(true)}>
+          <Plus size={16} />
+          Add Menu Item
+        </button>
       </div>
 
       <div className="menu-filters">
-        <div className="search-bar">
-          <div className="search-input-wrapper">
-           
-            <input
-              type="text"
-              placeholder="Search menu items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-        </div>
-
-        <div className="filter-controls">
-          <div className="filter-group">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="filter-select"
-            >
-              <option value="">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <input
+          type="text"
+          placeholder="Search menu items..."
+          className="search-input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className="filter-select"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="">All Categories</option>
+          {categories.map(category => (
+            <option key={category} value={category}>
+              {category.charAt(0).toUpperCase() + category.slice(1)}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="menu-stats">
-        <div className="stat-item">
-          <span className="stat-value">{filteredItems.length}</span>
-          <span className="stat-label">Total Items</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">
-            {filteredItems.filter(item => item.isAvailable).length}
-          </span>
-          <span className="stat-label">Available</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">
-            {filteredItems.filter(item => !item.isAvailable).length}
-          </span>
-          <span className="stat-label">Unavailable</span>
-        </div>
-      </div>
-
-      {filteredItems.length === 0 ? (
-        <div className="empty-state">
-          <Coffee size={64} />
-          <h3>No menu items found</h3>
-          <p>
-            {searchTerm || selectedCategory
-              ? 'Try adjusting your search or filter criteria'
-              : 'Start by adding your first menu item'
-            }
-          </p>
-          {hasPermission('menu', 'create') && !searchTerm && !selectedCategory && (
-            <button className="btn btn-primary" onClick={handleAddItem}>
-              <Plus size={20}  className="plus-icon"/>
-              Add First Item
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="menu-grid">
-          {filteredItems.map(item => (
-            <div key={item._id} className={`menu-card ${!item.isAvailable ? 'unavailable' : ''}`}>
-              <div className="menu-card-header">
-                <div className="category-badge">
-                  <span className="category-icon">{getCategoryIcon(item.category)}</span>
-                  <span className="category-name">{item.category.charAt(0).toUpperCase() + item.category.slice(1)}</span>
-                </div>
-                <div className="availability-badge">
-                  {item.isAvailable ? (
-                    <span className="available">Available</span>
-                  ) : (
-                    <span className="unavailable">Unavailable</span>
-                  )}
-                </div>
+      <div className="menu-grid">
+        {filteredItems.map(item => (
+          <div key={item._id} className="menu-item-card">
+            <div className="menu-item-image">
+              {item.image ? (
+                <img src={item.image} alt={item.name} />
+              ) : (
+                <span>🍽️</span>
+              )}
+            </div>
+            <div className="menu-item-content">
+              <h3 className="menu-item-name">{item.name}</h3>
+              <p className="menu-item-description">{item.description}</p>
+              <div className="menu-item-details">
+                <span className="menu-item-price">Nrs {(item.price || 0).toFixed(2)}</span>
+                <span className="menu-item-category">{item.category}</span>
               </div>
-
-              <div className="menu-card-content">
-                <h3 className="item-name">{item.name}</h3>
-                {item.description && (
-                  <p className="item-description">{item.description}</p>
-                )}
-                
-                <div className="item-pricing">
-                  <div className="price-info">
-                    <span className="price">Nrs{item.price.toFixed(2)}</span>
-                    <span className="cost">Cost: Nrs{item.cost.toFixed(2)}</span>
-                  </div>
-                  <div className="profit-margin">
-                    Margin: {(((item.price - item.cost) / item.price) * 100).toFixed(1)}%
-                  </div>
-                </div>
-
-                {item.preparationTime && (
-                  <div className="prep-time">
-                    <span>Prep time: {item.preparationTime} min</span>
-                  </div>
-                )}
-
-                {item.tags && item.tags.length > 0 && (
-                  <div className="item-tags">
-                    {item.tags.map((tag, index) => (
-                      <span key={index} className="tag">{tag}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="menu-card-actions">
-                {hasPermission('menu', 'update') && (
-                  <>
-                    <button
-                      className="action-btn toggle-btn"
-                      onClick={() => handleToggleAvailability(item._id, item.isAvailable)}
-                      title={item.isAvailable ? 'Mark as unavailable' : 'Mark as available'}
-                    >
-                      {item.isAvailable ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                    <button
-                      className="action-btn edit-btn"
-                      onClick={() => handleEditItem(item)}
-                      title="Edit item"
-                    >
-                      <Edit size={16} />
-                    </button>
-                  </>
-                )}
+              <span className={`menu-item-status ${item.isAvailable ? 'available' : 'unavailable'}`}>
+                {item.isAvailable ? 'Available' : 'Unavailable'}
+              </span>
+              <div className="menu-item-actions">
+                <button
+                  className="action-btn edit"
+                  onClick={() => handleEditItem(item)}
+                  title="Edit item"
+                >
+                  <Edit size={16} />
+                </button>
+                <button
+                  className="action-btn edit"
+                  onClick={() => handleToggleAvailability(item._id, item.isAvailable)}
+                  title={item.isAvailable ? 'Mark unavailable' : 'Mark available'}
+                >
+                  {item.isAvailable ? '🔄' : '✅'}
+                </button>
                 {hasPermission('menu', 'delete') && (
                   <button
-                    className="action-btn delete-btn"
+                    className="action-btn delete"
                     onClick={() => handleDeleteItem(item._id)}
                     title="Delete item"
                   >
@@ -287,15 +205,30 @@ const Menu = () => {
                 )}
               </div>
             </div>
-          ))}
+          </div>
+        ))}
+      </div>
+
+      {filteredItems.length === 0 && (
+        <div className="empty-state">
+          <h3>No menu items found</h3>
+          <p>
+            {searchTerm || selectedCategory
+              ? 'Try adjusting your search or filter criteria'
+              : 'Start by adding your first menu item'
+            }
+          </p>
         </div>
       )}
 
       {showModal && (
         <MenuItemModal
           item={selectedItem}
-          onClose={handleModalClose}
-          onSave={handleModalSave}
+          onClose={() => setShowModal(false)}
+          onSave={() => {
+            fetchMenuItems();
+            setShowModal(false);
+          }}
         />
       )}
     </div>

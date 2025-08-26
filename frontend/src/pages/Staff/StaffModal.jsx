@@ -116,48 +116,58 @@ const StaffModal = ({ staff, onClose, onSave }) => {
     }
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleModalContentClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content staff-modal">
-        <div className="modal-header">
+    <div className="staff-modal-overlay" onClick={handleOverlayClick}>
+      <div className="staff-modal-content" onClick={handleModalContentClick}>
+        <div className="staff-modal-header">
           <h2>{staff ? 'Edit Staff Member' : 'Add New Staff Member'}</h2>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} />
+          <button className="staff-close-btn" onClick={onClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
-          {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleSubmit} className="staff-modal-form">
+          {error && <div className="staff-error-message">{error}</div>}
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">Full Name *</label>
+          <div className="staff-form-row">
+            <div className="staff-form-group">
+              <label htmlFor="name" className="staff-form-label">Full Name *</label>
               <input
                 type="text"
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="form-input"
+                className="staff-form-input"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">Email Address *</label>
+            <div className="staff-form-group">
+              <label htmlFor="email" className="staff-form-label">Email Address *</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="form-input"
+                className="staff-form-input"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">
+            <div className="staff-form-group">
+              <label htmlFor="password" className="staff-form-label">
                 Password {staff ? '(leave blank to keep current)' : '*'}
               </label>
               <input
@@ -166,19 +176,19 @@ const StaffModal = ({ staff, onClose, onSave }) => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="form-input"
+                className="staff-form-input"
                 required={!staff}
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="role" className="form-label">Role *</label>
+            <div className="staff-form-group">
+              <label htmlFor="role" className="staff-form-label">Role *</label>
               <select
                 id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="form-select"
+                className="staff-form-select"
                 required
               >
                 {roles.map(role => (
@@ -189,20 +199,20 @@ const StaffModal = ({ staff, onClose, onSave }) => {
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="phone" className="form-label">Phone Number</label>
+            <div className="staff-form-group">
+              <label htmlFor="phone" className="staff-form-label">Phone Number</label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="form-input"
+                className="staff-form-input"
               />
             </div>
 
-            <div className="form-group">
-              <label className="checkbox-label">
+            <div className="staff-form-group">
+              <label className="staff-checkbox-label">
                 <input
                   type="checkbox"
                   name="isActive"
@@ -241,7 +251,7 @@ const StaffModal = ({ staff, onClose, onSave }) => {
                             checked={hasPermission(module.name, action)}
                             onChange={(e) => handlePermissionChange(module.name, action, e.target.checked)}
                           />
-                          {action.charAt(0).toUpperCase() + action.slice(1)}
+                          <span>{action.charAt(0).toUpperCase() + action.slice(1)}</span>
                         </label>
                       ))}
                     </div>
@@ -254,7 +264,7 @@ const StaffModal = ({ staff, onClose, onSave }) => {
           <div className="modal-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="staff-modal-btn staff-modal-btn-secondary"
               onClick={onClose}
               disabled={loading}
             >
@@ -262,7 +272,7 @@ const StaffModal = ({ staff, onClose, onSave }) => {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="staff-modal-btn staff-modal-btn-primary"
               disabled={loading}
             >
               {loading ? (

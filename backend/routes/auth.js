@@ -22,29 +22,97 @@ async function generateUniqueShopId() {
 router.post('/signup-shop', async (req, res) => {
   try {
     const { shopName, address, ownerName, ownerEmail, ownerPassword } = req.body;
+    
+    // Validate required fields
     if (!shopName || !ownerName || !ownerEmail || !ownerPassword) {
-      return res.status(400).json({ message: 'Missing required fields.' });
+      return res.status(400).json({ 
+        message: 'Missing required fields: shopName, ownerName, ownerEmail, ownerPassword' 
+      });
     }
 
-    // Unique shopId
+    // Validate password length
+    if (ownerPassword.length < 6) {
+      return res.status(400).json({ 
+        message: 'Password must be at least 6 characters long' 
+      });
+    }
+
+    // Check if email already exists (case-insensitive)
+    const existingUser = await User.findOne({ 
+      email: ownerEmail.toLowerCase() 
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({ 
+        message: 'User with this email already exists' 
+      });
+    }
+
+    // Generate unique shopId
     const shopId = await generateUniqueShopId();
 
-    // Create shop
-    const shop = await Shop.create({ name: shopName, address, shopId });
+    // Create shop first
+    const shop = await Shop.create({ 
+      name: shopName, 
+      address: address || '', 
+      shopId 
+    });
 
-    // Create first user (admin)
-    
+    // Create first user (admin) with hashed password
     const user = await User.create({
-  name: ownerName,
-  email: ownerEmail,
-  password: ownerPassword,  // raw password here
-  role: 'admin',
-  shopId
-});
+      name: ownerName,
+      email: ownerEmail.toLowerCase(),
+      password: ownerPassword, // Will be automatically hashed by pre-save middleware
+      role: 'admin',
+      shopId: shop.shopId,
+      permissions: [
+        { module: 'orders', actions: ['create', 'read', 'update', 'delete'] },
+        { module: 'menu', actions: ['create', 'read', 'update', 'delete'] },
+        { module: 'inventory', actions: ['create', 'read', 'update', 'delete'] },
+        { module: 'staff', actions: ['create', 'read', 'update', 'delete'] },
+        { module: 'customers', actions: ['create', 'read', 'update', 'delete'] },
+        { module: 'tables', actions: ['create', 'read', 'update', 'delete'] },
+        { module: 'suppliers', actions: ['create', 'read', 'update', 'delete'] },
+        { module: 'reports', actions: ['read'] },
+        { module: 'settings', actions: ['read', 'update'] }
+      ]
+    });
 
-    res.status(201).json({ shopId, message: 'Shop and admin created successfully.' });
+    res.status(201).json({ 
+      shopId: shop.shopId, 
+      message: 'Shop and admin created successfully.',
+      shop: {
+        name: shop.name,
+        address: shop.address,
+        shopId: shop.shopId
+      },
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Signup error', error: err.message });
+    console.error('Signup error:', err);
+    
+    // Handle specific MongoDB errors
+    if (err.code === 11000) {
+      if (err.keyPattern?.email) {
+        return res.status(400).json({ 
+          message: 'User with this email already exists' 
+        });
+      }
+      if (err.keyPattern?.shopId) {
+        return res.status(500).json({ 
+          message: 'Shop ID generation failed. Please try again.' 
+        });
+      }
+    }
+    
+    res.status(500).json({ 
+      message: 'Signup error', 
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
 });
 
